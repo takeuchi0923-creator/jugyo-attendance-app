@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#123c35"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="授業出欠管理"><link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" href="./icon-192.png"><title>授業出欠管理 v3.8.3・出欠集計対応</title>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#123c35"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="授業出欠管理"><link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" href="./icon-192.png"><title>授業出欠管理 v3.8.4・画面整理版</title>
 <style>
 :root{--g:#123c35;--g2:#286b5a;--bg:#f1f5f2;--card:#fff;--ink:#17231f;--muted:#68766f;--line:#dfe8e2;--red:#c73535;--blue:#3269a8;--purple:#7452a5;--amber:#a96a00}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Meiryo",sans-serif}
@@ -13,7 +13,7 @@ button{font:inherit;cursor:pointer}.smallbtn{border:0;border-radius:10px;padding
 .seat-scroller{overflow-x:auto;padding:0 0 5px}.seat-grid{display:grid;grid-template-rows:repeat(5,76px);grid-auto-columns:minmax(82px,1fr);grid-auto-flow:column;gap:7px;min-width:max-content}.seat{width:100%;height:76px;border:1.5px solid var(--line);border-radius:12px;background:#f8fbf9;padding:5px 3px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--ink)}.seat .no{font-size:11px;color:var(--muted)}.seat .nm{font-size:13px;font-weight:750;text-align:center;line-height:1.2;max-width:100%;overflow-wrap:anywhere}.seat .st{font-size:10px;font-weight:850}.seat.abs{background:#fff0f0;border-color:#e7aaaa;color:#9f2424}.seat.pub{background:#edf4ff;border-color:#abc8ee;color:#245b9c}.seat.stop{background:#f3edff;border-color:#c5b1e9;color:#67449a}.teacher-side{margin:8px auto 0;text-align:center;max-width:420px;background:#687970;color:#fff;border-radius:8px;padding:6px;font-size:11px;font-weight:800;letter-spacing:.15em}
 .teacher-side{text-align:center;font-size:11px;color:#fff;background:#65766d;border-radius:7px;padding:5px;margin-top:8px;letter-spacing:.15em}
 .toggle{display:flex;gap:5px;background:#edf2ee;padding:4px;border-radius:12px}.toggle button{flex:1;border:0;background:transparent;padding:10px 8px;border-radius:9px;font-size:13px;font-weight:700;color:var(--muted)}.toggle button.on{background:#fff;color:var(--g);box-shadow:0 1px 4px #0001}
-.listrow{display:grid;grid-template-columns:65px 1fr auto;gap:10px;align-items:center;padding:12px 5px;border-bottom:1px solid var(--line)}.listrow:last-child{border:0}.tag{font-size:11px;font-weight:800;border-radius:20px;padding:6px 9px}.empty{text-align:center;padding:24px;color:var(--muted);font-size:13px}.cautionnote{font-size:11px;color:var(--muted);margin-top:9px}
+.empty{text-align:center;padding:24px;color:var(--muted);font-size:13px}.cautionnote{font-size:11px;color:var(--muted);margin-top:9px}
 @media(max-width:650px){.summary-card{padding:8px 3px}.summary-card b{font-size:19px}.summary-card small{font-size:10px}.fields{grid-template-columns:1fr}.homebtn{font-size:19px;min-height:108px}.homebuttons{gap:8px}.seat-grid{grid-template-rows:repeat(5,66px);grid-auto-columns:76px;gap:5px}.seat{height:66px}.seat .nm{font-size:11px}}
 
 .nonpe-groups{display:grid;gap:16px;margin-top:10px}.nonpe-class{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fbfcfb}.nonpe-class-title{font-size:14px;font-weight:850;color:var(--g);margin-bottom:9px}.nonpe-scroll{overflow-x:auto;padding-bottom:5px}.roster-tap-list{display:grid;grid-template-rows:repeat(10,minmax(54px,auto));grid-auto-columns:minmax(132px,1fr);grid-auto-flow:column;gap:7px;min-width:max-content}.roster-tap{min-height:54px;padding:8px 9px}.roster-tap strong{font-size:14px}.roster-tap .roster-meta{font-size:11px}
@@ -27,10 +27,14 @@ button{font:inherit;cursor:pointer}.smallbtn{border:0;border-radius:10px;padding
 <header><div class="brand">CLASSROOM TOOLS</div><div class="head"><h1>授業出欠管理</h1><div class="date" id="today"></div></div></header>
 <main>
 <section id="home" class="screen active">
-<div class="homebuttons"><button type="button" class="homebtn" id="goReg">出欠登録<small>合同クラス・男女別整列で入力</small></button><button type="button" class="homebtn" id="goList">出欠一覧<small>出席番号順で確認</small></button></div>
+<div class="homebuttons"><button type="button" class="homebtn" id="goReg">出欠登録<small>合同クラス・男女別整列で入力</small></button><button type="button" class="homebtn" id="goSummaryHome">出欠統計<small>生徒別の出欠状況を確認</small></button></div>
 <section class="panel"><div class="row"><h2>欠席日数 CAUTION</h2><button class="smallbtn" id="thresholdBtn">基準設定</button></div><div id="cautions" class="homealerts"></div><div class="cautionnote">欠席のみを集計。公欠・出席停止は欠席日数に含めません。初期注意基準は5日（4日以上で表示）です。</div></section>
-<section class="panel"><h2>出欠統計</h2><p class="hint">教科・クラスごとに生徒別の授業実施時数、欠席・公欠・出席停止を集計します。</p><button class="primary" id="goSummary">出欠統計を開く</button></section>
-<section class="panel"><h2>過去の出欠データ一括入力</h2><p class="hint">生徒を縦、授業日を横に並べたExcelテンプレートをCSV形式で読み込みます。授業日がある列は、空欄を含めて出席として取り込みます。</p><button class="primary" id="goImport">過去データを取り込む</button></section>
+<section class="panel"><h2>設定</h2><p class="hint">過去の出欠データの取り込みや、名簿・バックアップに関する操作を行います。</p><button class="primary" id="goSettings">設定を開く</button></section>
+</section>
+<section id="settings" class="screen"><button class="smallbtn back" data-home>← ホーム</button>
+<section class="panel"><h2>設定</h2><div class="actions"><button class="primary" id="settingsHistory">過去の出欠データ</button><button class="primary" id="settingsRoster">名簿バックアップ</button></div></section>
+</section>
+<section id="rosterSettings" class="screen"><button class="smallbtn back" data-settings>← 設定</button>
 <section class="panel"><h2>名簿・バックアップ</h2><div class="actions"><button class="smallbtn" id="rosterTemplate">名簿CSVテンプレートを出力</button><button class="smallbtn" id="rosterExport" type="button">共通名簿配布ファイルを出力</button><label class="smallbtn" for="rosterPackageFile" style="text-align:center;cursor:pointer">共通名簿を更新</label><input id="rosterPackageFile" type="file" accept=".json,application/json" hidden><label class="smallbtn" for="excel" style="text-align:center;cursor:pointer">教科別名簿CSVを読み込む</label><input id="excel" type="file" accept=".csv,text/csv" hidden></div>
 <div style="margin-top:14px;padding:12px;border:1px solid var(--line);border-radius:12px">
 <strong style="font-size:14px">端末設定</strong>
@@ -58,25 +62,21 @@ button{font:inherit;cursor:pointer}.smallbtn{border:0;border-radius:10px;padding
 <section id="reg" class="screen"><button class="smallbtn back" data-home>← ホーム</button>
 <section class="panel"><h2>① 出欠登録</h2><div class="fields"><div><label>授業（合同クラス）</label><select id="course"></select></div><div><label>授業日</label><input type="date" id="date"></div><div><label>単位数</label><input id="units" readonly></div></div><p class="hint" id="courseInfo"></p></section>
 <section class="panel"><div class="row"><h2 style="margin:0">整列タップ入力</h2><span id="total" class="hint"></span></div><div class="summary-grid" id="regSummary"><div class="summary-card"><b id="regPresent">0</b><small>出席</small></div><div class="summary-card absbox"><b id="regAbsent">0</b><small>欠席</small></div><div class="summary-card pubbox"><b id="regOfficial">0</b><small>公欠</small></div><div class="summary-card stopbox"><b id="regSusp">0</b><small>出席停止</small></div></div><div class="legend"><span class="pill present">出席</span><span class="pill absent">欠席</span><span class="pill official">公欠</span><span class="pill susp">出席停止</span></div><p class="hint">体育は各クラス・男女ごとに縦5人ずつ配置します。保健・選択体育は各クラスごとに番号順で縦10人ずつ配置します。タップ順：出席 → 欠席 → 公欠 → 出席停止 → 出席。</p><div id="formation"></div><div class="actions" style="margin-top:15px"><button class="smallbtn" id="reset">全員出席に戻す</button><button class="primary" id="save">この授業を保存</button></div></section></section>
-<section id="list" class="screen"><button class="smallbtn back" data-home>← ホーム</button>
-<section class="panel"><h2>② 出欠一覧</h2><div class="fields"><div><label>授業</label><select id="listCourse"></select></div><div><label>授業日</label><input type="date" id="listDate"></div><div><label>並び順</label><div class="toggle"><button class="on" id="classSort">クラス順</button><button id="genderSort">男女別（男が上）</button></div></div></div></section>
-<section class="panel"><div class="row"><h2 style="margin:0">出欠状況</h2><span class="hint" id="listCount"></span></div><div class="summary-grid"><div class="summary-card"><b id="listPresent">0</b><small>出席</small></div><div class="summary-card absbox"><b id="listAbsent">0</b><small>欠席</small></div><div class="summary-card pubbox"><b id="listOfficial">0</b><small>公欠</small></div><div class="summary-card stopbox"><b id="listSusp">0</b><small>出席停止</small></div></div><div id="listRows"></div></section></section>
-
 <section id="summary" class="screen"><button class="smallbtn back" data-home>← ホーム</button>
 <section class="panel"><h2>出欠統計</h2><div class="fields"><div><label>教科</label><select id="summarySubject"><option value="体育">体育</option><option value="保健">保健</option><option value="選択体育">選択体育</option></select></div><div><label>クラス</label><select id="summaryClass"></select></div><div style="display:flex;align-items:end"><button class="primary" id="summaryExport" style="width:100%">この集計をCSV出力</button></div></div>
 <p class="hint">授業実施時数は、保存された授業日数（同じ授業・同じ日付の重複保存は1回）です。欠席・公欠・出席停止はそれぞれの該当時数を表示します。</p></section>
-<section class="panel"><div class="row"><h2 style="margin:0">生徒別集計</h2><span id="summaryCount" class="hint"></span></div><div style="overflow-x:auto"><table id="summaryTable" style="width:100%;border-collapse:collapse;min-width:680px"><thead><tr style="background:#edf3ef"><th style="padding:10px;text-align:left">番号</th><th style="padding:10px;text-align:left">氏名</th><th style="padding:10px">授業実施時数</th><th style="padding:10px">欠席時数</th><th style="padding:10px">公欠時数</th><th style="padding:10px">出席停止時数</th></tr></thead><tbody id="summaryRows"></tbody></table></div><p class="hint">生徒の行を選択すると、その生徒の欠席日・公欠日・出席停止日を確認できます。</p></section>
+<section class="panel"><div class="row"><h2 style="margin:0">生徒別集計</h2><span id="summaryCount" class="hint"></span></div><div class="toggle" style="margin:10px 0 12px"><button class="on" id="summaryNumberSort" type="button">出席番号順</button><button id="summaryGenderSort" type="button">男女別出席番号順</button></div><div style="overflow-x:auto"><table id="summaryTable" style="width:100%;border-collapse:collapse;min-width:680px"><thead><tr style="background:#edf3ef"><th style="padding:10px;text-align:left">番号</th><th style="padding:10px;text-align:left">氏名</th><th style="padding:10px">授業実施時数</th><th style="padding:10px">欠席時数</th><th style="padding:10px">公欠時数</th><th style="padding:10px">出席停止時数</th></tr></thead><tbody id="summaryRows"></tbody></table></div><p class="hint">生徒の行を選択すると、その生徒の欠席日・公欠日・出席停止日を確認できます。</p></section>
 <section class="panel" id="studentDetail" style="display:none"><h2 id="detailName">生徒の詳細</h2><div id="detailDates"></div></section>
 </section>
-<section id="import" class="screen"><button class="smallbtn back" data-home>← ホーム</button>
-<section class="panel"><h2>③ 過去の出欠データ一括入力</h2>
+<section id="import" class="screen"><button class="smallbtn back" data-settings>← 設定</button>
+<section class="panel"><h2>過去の出欠データ</h2>
 <div class="fields"><div><label>授業（合同クラス）</label><select id="importCourse"></select></div><div><label>授業日範囲</label><input id="importRange" readonly value="CSV内の日付を確認"></div><div><label>取込件数</label><input id="importCount" readonly value="未確認"></div></div>
 <p class="hint">まずアプリから名簿入りCSVテンプレートを出力し、学校PCのExcel等で日付と出欠を入力してから、この画面で読み込めます。ファイルはこの端末内で処理します。</p>
 <div class="actions"><button class="primary" id="downloadHistoryTemplate">① 名簿入りCSVテンプレートを出力</button><label class="smallbtn" for="historyCsv" style="text-align:center;cursor:pointer">② 入力済みCSVを読み込む</label></div><input id="historyCsv" type="file" accept=".csv,text/csv" hidden>
 <div id="importPreview" class="hint" style="margin-top:12px">まだファイルが選択されていません。</div>
 <div class="actions" style="margin-top:14px"><button class="smallbtn" id="clearImport">選択解除</button><button class="primary" id="confirmImport" disabled>確認して一括登録</button></div>
 </section></section>
-<p class="foot">試作版 v3.8.3。名簿・出欠データはこのブラウザ内に保存されます。過去データ取込はCSVを端末内で処理します。端末番号の登録、週次バックアップの目安表示、初回に学校共通パスワードを設定すると、非抽出の暗号鍵を端末内に保存し、以後のバックアップ・復元時の入力を省略します。端末間同期は未実装です。実在する生徒情報での運用前に、学校の承認とセキュリティ実装が必要です。</p>
+<p class="foot">試作版 v3.8.4。名簿・出欠データはこのブラウザ内に保存されます。過去データ取込はCSVを端末内で処理します。端末番号の登録、週次バックアップの目安表示、初回に学校共通パスワードを設定すると、非抽出の暗号鍵を端末内に保存し、以後のバックアップ・復元時の入力を省略します。端末間同期は未実装です。実在する生徒情報での運用前に、学校の承認とセキュリティ実装が必要です。</p>
 </main>
 <script>
 const $=id=>document.getElementById(id),read=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},write=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
@@ -94,13 +94,14 @@ let students=read('v3students',null);
 if(!Array.isArray(students)){students=DEFAULT_ROSTER;write('v3students',students);}
 let records=read('v3records',[]),threshold=read('v3threshold',5),states={};
 const d=new Date(),today=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
-$('today').textContent=d.toLocaleDateString('ja-JP',{month:'long',day:'numeric',weekday:'short'});$('date').value=today;$('listDate').value=today;
+$('today').textContent=d.toLocaleDateString('ja-JP',{month:'long',day:'numeric',weekday:'short'});$('date').value=today;
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));const target=$(id);if(!target){alert('画面の読み込みに失敗しました。ページを再読み込みしてください。');return;}target.classList.add('active');if(id==='home')renderCautions();if(id==='list')renderList()}
+function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));const target=$(id);if(!target){alert('画面の読み込みに失敗しました。ページを再読み込みしてください。');return;}target.classList.add('active');if(id==='home')renderCautions()}
 $('goReg').addEventListener('click',()=>show('reg'));
-$('goList').addEventListener('click',()=>show('list'));$('goSummary').addEventListener('click',()=>{prepareSummaryClasses();show('summary');renderSummary()});$('goImport').addEventListener('click',()=>show('import'));document.querySelectorAll('[data-home]').forEach(b=>b.onclick=()=>show('home'));
+function openSummary(){prepareSummaryClasses();show('summary');renderSummary()}
+$('goSummaryHome').addEventListener('click',openSummary);$('goSettings').addEventListener('click',()=>show('settings'));$('settingsHistory').addEventListener('click',()=>show('import'));$('settingsRoster').addEventListener('click',()=>show('rosterSettings'));document.querySelectorAll('[data-home]').forEach(b=>b.onclick=()=>show('home'));document.querySelectorAll('[data-settings]').forEach(b=>b.onclick=()=>show('settings'));
 function course(id){return COURSES.find(c=>c.id===id)||COURSES[0]}
-function fillCourses(){['course','listCourse','importCourse'].forEach(id=>$(id).innerHTML=COURSES.map(c=>`<option value="${c.id}">${esc(c.label)}</option>`).join(''))}
+function fillCourses(){['course','importCourse'].forEach(id=>$(id).innerHTML=COURSES.map(c=>`<option value="${c.id}">${esc(c.label)}</option>`).join(''))}
 function courseStudents(c){
  const subjectOf=s=>s.subject||(s.cls&&c.subject==='体育'?'体育':'');
  if(c.id==='3-LPE')return students.filter(s=>s.enrollmentStatus!=='ended'&&subjectOf(s)==='選択体育');
@@ -162,28 +163,6 @@ function renderFormation(){
 }
 $('course').onchange=()=>{states={};renderFormation()};$('date').onchange=()=>{states={};renderFormation()};$('reset').onclick=()=>{states={};renderFormation()};
 $('save').onclick=()=>{let c=course($('course').value),all=courseStudents(c);if(!all.length)return alert('対象クラスの名簿を読み込んでください。');let rec={id:'r'+Date.now(),courseId:c.id,label:c.label,subject:c.subject,units:c.units,date:$('date').value,statuses:all.map(s=>({id:s.id,cls:s.cls,no:s.no,name:s.name,gender:s.gender,status:status(s)}))};records.push(rec);write('v3records',records);alert('出欠を保存しました。')};
-function selectedRecord(){return records.filter(r=>r.courseId===$('listCourse').value&&r.date===$('listDate').value).slice(-1)[0]}
-function renderList(){
- let c=course($('listCourse').value),all=courseStudents(c),rec=selectedRecord(),map={};
- if(rec)rec.statuses.forEach(s=>map[s.id]=s.status);
- let genderMode=$('genderSort').classList.contains('on');
- all.sort((a,b)=>{
-  if(genderMode){let g=['男','女','未設定'].indexOf(a.gender)-['男','女','未設定'].indexOf(b.gender);if(g)return g}
-  let cl=c.classes.indexOf(a.cls)-c.classes.indexOf(b.cls);
-  return cl||((+a.no||9999)-(+b.no||9999));
- });
- const counts={'出席':0,'欠席':0,'公欠':0,'出席停止':0,'未登録':0};
- all.forEach(s=>{let st=map[s.id]||'未登録';counts[st]=(counts[st]||0)+1});
- $('listCount').textContent=all.length+'人'+(rec?'':' ／ 未登録');
- $('listPresent').textContent=counts['出席'];$('listAbsent').textContent=counts['欠席'];
- $('listOfficial').textContent=counts['公欠'];$('listSusp').textContent=counts['出席停止'];
- if(!all.length){$('listRows').innerHTML='<div class="empty">名簿がありません。</div>';return}
- $('listRows').innerHTML=all.map(s=>{
-  let st=map[s.id]||'未登録',tag=st==='欠席'?'absent':st==='公欠'?'official':st==='出席停止'?'susp':'present';
-  return `<div class="listrow"><span class="hint">${esc(s.cls)}<br>${esc(s.no)}番</span><b>${esc(s.name)} <small class="hint">${esc(s.gender)}</small></b><span class="pill ${tag}">${st}</span></div>`;
- }).join('');
-}
-$('listCourse').onchange=renderList;$('listDate').onchange=renderList;$('classSort').onclick=()=>{$('classSort').classList.add('on');$('genderSort').classList.remove('on');renderList()};$('genderSort').onclick=()=>{$('genderSort').classList.add('on');$('classSort').classList.remove('on');renderList()};
 function subjectForRecord(r){
  if(r.subject)return r.subject;
  const c=COURSES.find(x=>x.id===r.courseId);
@@ -205,7 +184,9 @@ function summaryRecords(subject,cls){
 }
 function renderSummary(){
  const subject=$('summarySubject').value,cls=$('summaryClass').value;
- const roster=students.filter(s=>s.enrollmentStatus!=='ended'&&s.cls===cls&&(s.subject||(s.cls?'体育':''))===subject).sort((a,b)=>(Number(a.no)||9999)-(Number(b.no)||9999));
+ const roster=students.filter(s=>s.enrollmentStatus!=='ended'&&s.cls===cls&&(s.subject||(s.cls?'体育':''))===subject);
+ const genderMode=$('summaryGenderSort').classList.contains('on');
+ roster.sort((a,b)=>{if(genderMode){const g=['男','女','未設定'].indexOf(a.gender)-['男','女','未設定'].indexOf(b.gender);if(g)return g;}return (Number(a.no)||9999)-(Number(b.no)||9999);});
  const recs=summaryRecords(subject,cls);
  $('summaryCount').textContent=`${cls||'—'} ／ ${roster.length}人`;
  $('studentDetail').style.display='none';
@@ -229,10 +210,14 @@ function showStudentDetail(id,subject,cls,recs){
 }
 $('summarySubject').onchange=()=>{prepareSummaryClasses();renderSummary()};
 $('summaryClass').onchange=renderSummary;
+$('summaryNumberSort').onclick=()=>{$('summaryNumberSort').classList.add('on');$('summaryGenderSort').classList.remove('on');renderSummary()};
+$('summaryGenderSort').onclick=()=>{$('summaryGenderSort').classList.add('on');$('summaryNumberSort').classList.remove('on');renderSummary()};
 function exportSummaryCSV(){
  const subject=$('summarySubject').value,cls=$('summaryClass').value;
  if(!cls)return alert('クラスを選択してください。');
- const roster=students.filter(s=>s.enrollmentStatus!=='ended'&&s.cls===cls&&(s.subject||(s.cls?'体育':''))===subject).sort((a,b)=>(Number(a.no)||9999)-(Number(b.no)||9999));
+ const roster=students.filter(s=>s.enrollmentStatus!=='ended'&&s.cls===cls&&(s.subject||(s.cls?'体育':''))===subject);
+ const genderMode=$('summaryGenderSort').classList.contains('on');
+ roster.sort((a,b)=>{if(genderMode){const g=['男','女','未設定'].indexOf(a.gender)-['男','女','未設定'].indexOf(b.gender);if(g)return g;}return (Number(a.no)||9999)-(Number(b.no)||9999);});
  const recs=summaryRecords(subject,cls);
  const rows=[['教科',subject],['クラス',cls],[],['番号','氏名','授業実施時数','欠席時数','公欠時数','出席停止時数']];
  roster.forEach(st=>{
@@ -806,7 +791,9 @@ updatePasswordStatus();
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(err => {
+    navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then(reg => {
+      reg.update().catch(() => {});
+    }).catch(err => {
       console.warn('オフライン利用の準備に失敗しました', err);
     });
   });
