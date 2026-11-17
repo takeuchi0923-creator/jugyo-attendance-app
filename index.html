@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#123c35"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="授業出欠管理"><link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" href="./icon-192.png"><title>授業出欠管理 v3.8.9・安全性点検版</title>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#123c35"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="授業出欠管理"><link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" href="./icon-192.png"><title>授業出欠管理 v3.8.3・出欠集計対応</title>
 <style>
 :root{--g:#123c35;--g2:#286b5a;--bg:#f1f5f2;--card:#fff;--ink:#17231f;--muted:#68766f;--line:#dfe8e2;--red:#c73535;--blue:#3269a8;--purple:#7452a5;--amber:#a96a00}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Meiryo",sans-serif}
 header{background:var(--g);color:white;padding:19px 22px 23px;border-radius:0 0 23px 23px}.brand{font-size:11px;letter-spacing:.14em;opacity:.8}.head{display:flex;justify-content:space-between;align-items:end;margin-top:7px}h1{font-size:25px;margin:0}.date{font-size:13px;opacity:.8}
 main{max-width:1200px;margin:16px auto 35px;padding:0 16px}.screen{display:none}.screen.active{display:block}.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 3px 14px #173d2a08}
 .homebuttons{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}.homebtn{min-height:130px;border:0;border-radius:20px;background:var(--g);color:#fff;font-size:24px;font-weight:800;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px}.homebtn:nth-child(2){background:var(--g2)}.homebtn small{font-size:12px;font-weight:500;opacity:.85}
-h2{font-size:18px;margin:0 0 13px}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.fields{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:12px}.fields>div{min-width:0}.fields select,.fields input{min-width:0}.reg-fields{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 96px;gap:16px;align-items:end}.reg-fields>div{min-width:0}.reg-fields .units-field{justify-self:end;width:96px;max-width:96px}.reg-fields input[type=date]{width:100%;min-width:0;display:block}@media(max-width:700px){.reg-fields{grid-template-columns:minmax(0,1fr) 96px;gap:10px}.reg-fields>div:first-child{grid-column:1/-1}.reg-fields .units-field{grid-column:2;grid-row:2}}label{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}select,input{width:100%;padding:12px;border:1px solid var(--line);border-radius:11px;background:white;color:var(--ink);font-size:16px}
+h2{font-size:18px;margin:0 0 13px}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.fields{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:12px}label{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}select,input{width:100%;padding:12px;border:1px solid var(--line);border-radius:11px;background:white;color:var(--ink);font-size:16px}
 button{font:inherit;cursor:pointer}.smallbtn{border:0;border-radius:10px;padding:10px 13px;background:#eaf1ed;color:var(--g);font-weight:700}.primary{border:0;border-radius:12px;padding:13px 16px;background:var(--g);color:#fff;font-weight:750}.back{margin-bottom:12px}.hint,.foot{font-size:12px;color:var(--muted);line-height:1.55}.homealerts{display:grid;gap:8px}#cautions{display:grid;gap:7px}.caution-guide{display:flex;gap:8px;flex-wrap:wrap;font-size:11px;color:#59675f;margin-bottom:2px}.caution-guide span{padding:4px 7px;border:1px solid #d9e3dd;border-radius:6px}.caution-guide .yellow-guide{background:#fff1a8;color:#c62828;border-color:#e3c85b}.caution-row{display:grid;grid-template-columns:minmax(130px,1.4fr) minmax(110px,1fr) 90px 120px;gap:10px;align-items:center;border:1px solid #d9e3dd;border-radius:9px;padding:10px 12px;background:transparent;color:#202820}.caution-row .caution-subject{font-size:12px;color:#56665d}.caution-row.level-six{color:#c62828}.caution-row.level-five{background:#fff1a8;color:#c62828;font-weight:850;border-color:#e3c85b}.caution-row .caution-count{text-align:center;font-variant-numeric:tabular-nums}.caution-head{display:grid;grid-template-columns:minmax(130px,1.4fr) minmax(110px,1fr) 90px 120px;gap:10px;padding:0 12px 5px;color:#64736a;font-size:12px;font-weight:750}.caution-head small{font-size:10px;font-weight:500;color:#64736a}@media(max-width:600px){.caution-row,.caution-head{grid-template-columns:1.2fr 1fr 64px 85px;gap:5px;padding-left:7px;padding-right:7px;font-size:12px}}
 .actions{display:flex;gap:9px;flex-wrap:wrap}.actions>*{flex:1}.summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}.summary-card{border-radius:13px;padding:10px 7px;text-align:center;background:#e6f4eb}.summary-card b{display:block;font-size:23px;line-height:1.2}.summary-card small{font-size:11px;font-weight:750}.summary-card.absbox{background:#ffebeb;color:var(--red)}.summary-card.pubbox{background:#eaf2ff;color:var(--blue)}.summary-card.stopbox{background:#f1eaff;color:var(--purple)}.legend{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.pill{border-radius:30px;padding:6px 10px;font-size:11px;font-weight:750}.present{background:#e6f4eb;color:#24794c}.absent{background:#ffebeb;color:var(--red)}.official{background:#eaf2ff;color:var(--blue)}.susp{background:#f1eaff;color:var(--purple)}
 .groups-wrap{display:grid;gap:18px}.classgroup{border:1px solid var(--line);border-radius:15px;padding:13px;background:#fbfcfb}.group-title{font-size:15px;font-weight:850;margin-bottom:11px;color:var(--g)}.gender-section+.gender-section{margin-top:15px;padding-top:13px;border-top:1px dashed #ccd8d0}.gender-title{font-size:13px;font-weight:800;margin-bottom:8px;display:flex;align-items:center;gap:8px}.gender-title:after{content:"";height:1px;background:var(--line);flex:1}
@@ -23,40 +23,6 @@ button{font:inherit;cursor:pointer}.smallbtn{border:0;border-radius:10px;padding
 .roster-tap.abs{background:#fff0ef;border-color:#d98b85}.roster-tap.abs .roster-status{background:#f8d7d4}
 .roster-tap.pub{background:#eef5ff;border-color:#9bb8dc}.roster-tap.pub .roster-status{background:#d9e8fb}
 .roster-tap.stop{background:#fff7e8;border-color:#dfc17b}.roster-tap.stop .roster-status{background:#f8e8bf}\n#summaryTable th,#summaryTable td{border-bottom:1px solid var(--line);padding:10px 8px;text-align:center;font-size:13px}#summaryTable td:nth-child(2),#summaryTable th:nth-child(2){text-align:left}#summaryTable tbody tr{cursor:pointer}#summaryTable tbody tr:hover{background:#f1f7f3}.detail-group{padding:10px 0;border-bottom:1px solid var(--line)}.detail-group strong{display:block;margin-bottom:5px}.detail-dates{font-size:14px;line-height:1.7}
-
-/* v3.8.9: iPad/tablet registration form layout fix */
-@media (max-width: 1100px) {
-  .reg-fields {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    column-gap: 12px;
-    row-gap: 12px;
-    align-items: end;
-  }
-  .reg-fields > div:first-child {
-    grid-column: 1 / -1;
-  }
-  .reg-fields > div:nth-child(2) {
-    grid-column: 1;
-    grid-row: 2;
-    min-width: 0;
-  }
-  .reg-fields .units-field {
-    grid-column: 2;
-    grid-row: 2;
-    justify-self: stretch;
-    width: auto;
-    max-width: none;
-    min-width: 0;
-  }
-  .reg-fields input[type="date"],
-  .reg-fields #units {
-    display: block;
-    width: 100%;
-    min-width: 0;
-    max-width: 100%;
-  }
-}
-
 </style></head><body>
 <header><div class="brand">CLASSROOM TOOLS</div><div class="head"><h1>授業出欠管理</h1><div class="date" id="today"></div></div></header>
 <main>
@@ -90,7 +56,7 @@ button{font:inherit;cursor:pointer}.smallbtn{border:0;border-radius:10px;padding
 <div id="backupMessage" class="hint" style="margin-top:8px">名簿・出欠記録・欠時数の設定を、JSONファイル1つに保存／復元できます。</div><div class="hint" style="margin-top:6px;padding:9px 10px;border-radius:9px;background:#eef4f0">共通パスワード運用：学校で定めた同じパスワードを、すべての教員用iPadのバックアップ保存・復元時に使用してください。パスワードはアプリ内には保存されません。</div><div id="backupScheduleStatus" class="hint" style="margin-top:5px"></div><div id="rosterMessage" class="hint" style="margin-top:10px">登録名簿：読み込み状況を確認してください。</div><p class="hint">PCで名簿を一元管理し、「共通名簿配布ファイルを出力」で全端末共通の暗号化ファイルを作成します。各iPadでは「共通名簿を更新」から読み込みます。名簿更新では出欠記録を変更しません。</p></section>
 </section>
 <section id="reg" class="screen"><button class="smallbtn back" data-home>← ホーム</button>
-<section class="panel"><h2>① 出欠登録</h2><div class="fields reg-fields"><div><label>授業（合同クラス）</label><select id="course"></select></div><div><label>授業日</label><input type="date" id="date"></div><div class="units-field"><label>単位数</label><input id="units" readonly></div></div><p class="hint" id="courseInfo"></p></section>
+<section class="panel"><h2>① 出欠登録</h2><div class="fields"><div><label>授業（合同クラス）</label><select id="course"></select></div><div><label>授業日</label><input type="date" id="date"></div><div><label>単位数</label><input id="units" readonly></div></div><p class="hint" id="courseInfo"></p></section>
 <section class="panel"><div class="row"><h2 style="margin:0">整列タップ入力</h2><span id="total" class="hint"></span></div><div class="summary-grid" id="regSummary"><div class="summary-card"><b id="regPresent">0</b><small>出席</small></div><div class="summary-card absbox"><b id="regAbsent">0</b><small>欠席</small></div><div class="summary-card pubbox"><b id="regOfficial">0</b><small>公欠</small></div><div class="summary-card stopbox"><b id="regSusp">0</b><small>出席停止</small></div></div><div class="legend"><span class="pill present">出席</span><span class="pill absent">欠席</span><span class="pill official">公欠</span><span class="pill susp">出席停止</span></div><p class="hint">体育は各クラス・男女ごとに縦5人ずつ配置します。保健・選択体育は各クラスごとに番号順で縦10人ずつ配置します。タップ順：出席 → 欠席 → 公欠 → 出席停止 → 出席。</p><div id="formation"></div><div class="actions" style="margin-top:15px"><button class="smallbtn" id="reset">全員出席に戻す</button><button class="primary" id="save">この授業を保存</button></div></section></section>
 <section id="list" class="screen"><button class="smallbtn back" data-home>← ホーム</button>
 <section class="panel"><h2>② 出欠一覧</h2><div class="fields"><div><label>授業</label><select id="listCourse"></select></div><div><label>授業日</label><input type="date" id="listDate"></div><div><label>並び順</label><div class="toggle"><button class="on" id="classSort">クラス順</button><button id="genderSort">男女別（男が上）</button></div></div></div></section>
@@ -110,7 +76,7 @@ button{font:inherit;cursor:pointer}.smallbtn{border:0;border-radius:10px;padding
 <div id="importPreview" class="hint" style="margin-top:12px">まだファイルが選択されていません。</div>
 <div class="actions" style="margin-top:14px"><button class="smallbtn" id="clearImport">選択解除</button><button class="primary" id="confirmImport" disabled>確認して一括登録</button></div>
 </section></section>
-<p class="foot">試作版 v3.8.9。名簿・出欠データはこのブラウザ内に保存されます。過去データ取込はCSVを端末内で処理します。端末番号の登録、週次バックアップの目安表示、初回に学校共通パスワードを設定すると、非抽出の暗号鍵を端末内に保存し、以後のバックアップ・復元時の入力を省略します。端末間同期は未実装です。実在する生徒情報での運用前に、学校の承認とセキュリティ実装が必要です。</p>
+<p class="foot">試作版 v3.8.3。名簿・出欠データはこのブラウザ内に保存されます。過去データ取込はCSVを端末内で処理します。端末番号の登録、週次バックアップの目安表示、初回に学校共通パスワードを設定すると、非抽出の暗号鍵を端末内に保存し、以後のバックアップ・復元時の入力を省略します。端末間同期は未実装です。実在する生徒情報での運用前に、学校の承認とセキュリティ実装が必要です。</p>
 </main>
 <script>
 const $=id=>document.getElementById(id),read=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},write=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
@@ -130,22 +96,6 @@ let records=read('v3records',[]),threshold=read('v3threshold',5),states={};
 const d=new Date(),today=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
 $('today').textContent=d.toLocaleDateString('ja-JP',{month:'long',day:'numeric',weekday:'short'});$('date').value=today;$('listDate').value=today;
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-// Stable identity: subject + class + number. Name, gender and furigana never affect the key.
-function normIdentityPart(v){return String(v??'').trim().normalize('NFKC').replace(/\s+/g,'').toUpperCase()}
-function rosterIdentity(st,subject){
- const resolvedSubject=subject??st.subject??(st.cls?'体育':'');
- return [normIdentityPart(resolvedSubject),normIdentityPart(st.cls),normIdentityPart(st.no)].join('|');
-}
-function recordStatusForStudent(rec,st){
- if(!rec||!Array.isArray(rec.statuses))return null;
- // Prefer the historical ID, but verify identity before using it so an accidental ID collision cannot misattribute attendance.
- const subject=rec.subject||(course(rec.courseId)?.subject)||'体育';
- const key=rosterIdentity(st,subject);
- const direct=rec.statuses.find(x=>String(x.id)===String(st.id)&&rosterIdentity(x,subject)===key);
- if(direct)return direct;
- // Older records may contain a different ID. Fall back to the stable identity key.
- return rec.statuses.find(x=>rosterIdentity(x,subject)===key)||null;
-}
 function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));const target=$(id);if(!target){alert('画面の読み込みに失敗しました。ページを再読み込みしてください。');return;}target.classList.add('active');if(id==='home')renderCautions();if(id==='list')renderList()}
 $('goReg').addEventListener('click',()=>show('reg'));
 $('goList').addEventListener('click',()=>show('list'));$('goSummary').addEventListener('click',()=>{prepareSummaryClasses();show('summary');renderSummary()});$('goImport').addEventListener('click',()=>show('import'));document.querySelectorAll('[data-home]').forEach(b=>b.onclick=()=>show('home'));
@@ -223,13 +173,13 @@ function renderList(){
   return cl||((+a.no||9999)-(+b.no||9999));
  });
  const counts={'出席':0,'欠席':0,'公欠':0,'出席停止':0,'未登録':0};
- all.forEach(s=>{let st=map[s.id]||(rec&&recordStatusForStudent(rec,s)?.status)||'未登録';counts[st]=(counts[st]||0)+1});
+ all.forEach(s=>{let st=map[s.id]||'未登録';counts[st]=(counts[st]||0)+1});
  $('listCount').textContent=all.length+'人'+(rec?'':' ／ 未登録');
  $('listPresent').textContent=counts['出席'];$('listAbsent').textContent=counts['欠席'];
  $('listOfficial').textContent=counts['公欠'];$('listSusp').textContent=counts['出席停止'];
  if(!all.length){$('listRows').innerHTML='<div class="empty">名簿がありません。</div>';return}
  $('listRows').innerHTML=all.map(s=>{
-  let st=map[s.id]||(rec&&recordStatusForStudent(rec,s)?.status)||'未登録',tag=st==='欠席'?'absent':st==='公欠'?'official':st==='出席停止'?'susp':'present';
+  let st=map[s.id]||'未登録',tag=st==='欠席'?'absent':st==='公欠'?'official':st==='出席停止'?'susp':'present';
   return `<div class="listrow"><span class="hint">${esc(s.cls)}<br>${esc(s.no)}番</span><b>${esc(s.name)} <small class="hint">${esc(s.gender)}</small></b><span class="pill ${tag}">${st}</span></div>`;
  }).join('');
 }
@@ -262,7 +212,7 @@ function renderSummary(){
  if(!roster.length){$('summaryRows').innerHTML='<tr><td colspan="6" class="empty">この教科・クラスの名簿がありません。</td></tr>';return;}
  $('summaryRows').innerHTML=roster.map(st=>{
   const stats={'欠席':[],'公欠':[],'出席停止':[]};let lesson=0;
-  recs.forEach(r=>{const recSt=recordStatusForStudent(r,st);if(!recSt)return;lesson++;if(stats[recSt.status])stats[recSt.status].push(r.date);});
+  recs.forEach(r=>{const recSt=r.statuses.find(x=>x.id===st.id);if(!recSt)return;lesson++;if(stats[recSt.status])stats[recSt.status].push(r.date);});
   return `<tr data-student="${esc(st.id)}"><td>${esc(st.no)}</td><td style="text-align:left">${esc(st.name)}</td><td>${lesson}</td><td>${stats['欠席'].length}</td><td>${stats['公欠'].length}</td><td>${stats['出席停止'].length}</td></tr>`;
  }).join('');
  $('summaryRows').querySelectorAll('tr[data-student]').forEach(tr=>tr.onclick=()=>showStudentDetail(tr.dataset.student,subject,cls,recs));
@@ -270,7 +220,7 @@ function renderSummary(){
 function showStudentDetail(id,subject,cls,recs){
  const st=students.find(x=>x.id===id);if(!st)return;
  const dates={'欠席':[],'公欠':[],'出席停止':[]};
- recs.forEach(r=>{const x=recordStatusForStudent(r,st);if(x&&dates[x.status])dates[x.status].push(r.date);});
+ recs.forEach(r=>{const x=r.statuses.find(y=>y.id===id);if(x&&dates[x.status])dates[x.status].push(r.date);});
  const fmt=d=>{const [y,m,day]=d.split('-');return `${Number(m)}/${Number(day)}`;};
  $('detailName').textContent=`${st.cls} ${st.no}番 ${st.name} の出欠日`;
  $('detailDates').innerHTML=Object.entries(dates).map(([label,ds])=>`<div class="detail-group"><strong>${label}（${ds.length}時数）</strong><div class="detail-dates">${ds.length?ds.sort().map(fmt).join('、'):'該当なし'}</div></div>`).join('');
@@ -287,7 +237,7 @@ function exportSummaryCSV(){
  const rows=[['教科',subject],['クラス',cls],[],['番号','氏名','授業実施時数','欠席時数','公欠時数','出席停止時数']];
  roster.forEach(st=>{
   const counts={'欠席':0,'公欠':0,'出席停止':0};let lesson=0;
-  recs.forEach(r=>{const x=recordStatusForStudent(r,st);if(!x)return;lesson++;if(counts[x.status]!==undefined)counts[x.status]++;});
+  recs.forEach(r=>{const x=r.statuses.find(y=>y.id===st.id);if(!x)return;lesson++;if(counts[x.status]!==undefined)counts[x.status]++;});
   rows.push([st.no,st.name,lesson,counts['欠席'],counts['公欠'],counts['出席停止']]);
  });
  const csv='\uFEFF'+rows.map(row=>row.map(csvEscape).join(',')).join('\r\n');
@@ -317,7 +267,7 @@ function renderCautions(){
   for(const st of courseRoster(c)){
    const absences=new Set();
    courseRecords.forEach(r=>{
-    const item=recordStatusForStudent(r,st);
+    const item=r.statuses.find(x=>x.id===st.id);
     if(item&&item.status==='欠席')absences.add(r.date);
    });
    const count=absences.size;
@@ -413,7 +363,7 @@ $('excel').addEventListener('change',async e=>{
    const id=subject==='体育'?`${cls}-${no}`:`${subject}-${cls}-${no}`;
    if(seen.has(id))throw Error(`${r+1}行目：${cls} ${no}番が重複しています。`);
    seen.add(id);
-   incoming.push({id,identityKey:rosterIdentity({cls,no,subject},subject),cls,no,name,gender:normalizeGender(line[3]),furigana:String(line[5]||'').trim(),subject});
+   incoming.push({id,cls,no,name,gender:normalizeGender(line[3]),furigana:String(line[5]||'').trim(),subject});
   }
   if(!incoming.length)throw Error('取り込める生徒がいません。');
   const replaceClasses=new Set(incoming.map(st=>st.cls));
@@ -680,17 +630,6 @@ function downloadJSON(filename,data){
   a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
-async function downloadPreRosterBackup(){
-  const key=await getStoredKey();
-  if(!key)throw new Error('名簿更新前の自動バックアップを作成できません。共通パスワード設定を確認してください。');
-  const payload={app:APP_BACKUP_ID,formatVersion:1,appVersion:'3.8.9',exportedAt:new Date().toISOString(),deviceNumber:currentDeviceNumber(),data:{students:JSON.parse(localStorage.getItem('v3students')||'[]'),records:JSON.parse(localStorage.getItem('v3records')||'[]'),threshold:JSON.parse(localStorage.getItem('v3threshold')||'5')}};
-  const iv=crypto.getRandomValues(new Uint8Array(12));
-  const cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(JSON.stringify(payload)));
-  const file={app:APP_BACKUP_ID,formatVersion:3,encrypted:true,encryption:'AES-256-GCM',keyDerivation:'PBKDF2-SHA-256',keyVersion:currentKeyVersion(),exportedAt:payload.exportedAt,iv:bytesToBase64(iv),ciphertext:bytesToBase64(new Uint8Array(cipher))};
-  const stamp=new Date().toISOString().replace(/[:.]/g,'-');
-  downloadJSON(`出欠管理_教員用iPad${currentDeviceNumber()||'未設定'}_名簿更新前バックアップ_${stamp}.json`,file);
-  return {students:payload.data.students.length,records:payload.data.records.length};
-}
 function readAppData(data){
   if(!data || data.app!==APP_BACKUP_ID || data.formatVersion!==1 ||
      !data.data || !Array.isArray(data.data.students) || !Array.isArray(data.data.records) ||
@@ -751,74 +690,30 @@ $('rosterPackageFile').addEventListener('change',async e=>{
     }catch(_){throw new Error('共通パスワードが一致しないか、ファイルが破損しています。');}
     if(payload.app!=='attendance-roster-package'||payload.formatVersion!==1||!Array.isArray(payload.students))
       throw new Error('名簿データの形式が正しくありません。');
-    const incoming=payload.students, ids=new Set(), incomingIdentitySet=new Set();
+    const incoming=payload.students, ids=new Set();
     for(const st of incoming){
       if(!st||!st.id||!st.cls||st.no==null||typeof st.name!=='string')throw new Error('名簿に不正な生徒データがあります。');
       if(ids.has(String(st.id)))throw new Error('名簿に重複した生徒IDがあります。');
       ids.add(String(st.id));
-      const identity=rosterIdentity(st);
-      if(incomingIdentitySet.has(identity))throw new Error(`同じ教科・クラス・番号の生徒が重複しています：${st.cls} ${st.no}番`);
-      incomingIdentitySet.add(identity);
     }
     const current=JSON.parse(localStorage.getItem('v3students')||'[]');
-    if(!Array.isArray(current))throw new Error('現在の名簿データを読み取れません。更新していません。');
-    const currentIdentitySet=new Set();
-    for(const st of current){
-      const identity=rosterIdentity(st);
-      if(currentIdentitySet.has(identity))throw new Error(`現在の名簿に同じ教科・クラス・番号の重複があります：${st.cls} ${st.no}番。先に名簿を確認してください。`);
-      currentIdentitySet.add(identity);
-    }
-    const incomingByIdentity=new Map(incoming.map(st=>[rosterIdentity(st),st]));
+    const incomingById=new Map(incoming.map(st=>[String(st.id),st]));
     const incomingClasses=new Set(incoming.map(st=>`${st.subject||(st.cls?'体育':'')}|${st.cls}`));
-    // Identity, not the incoming ID, is authoritative. IDs may be regenerated by another device.
-    const matchedIncoming=new Set();
     const merged=current.map(old=>{
-      const classKey=`${old.subject||(old.cls?'体育':'')}|${old.cls}`;
-      if(!incomingClasses.has(classKey))return old;
-      const identity=rosterIdentity(old);
-      const fresh=incomingByIdentity.get(identity);
-      if(!fresh)return {...old,enrollmentStatus:'ended'};
-      matchedIncoming.add(identity);
-      // Preserve this device's existing ID so its historic attendance records remain linked.
-      return {...old,...fresh,id:old.id,identityKey:identity,enrollmentStatus:'active'};
+      const key=`${old.subject||(old.cls?'体育':'')}|${old.cls}`;
+      if(!incomingClasses.has(key))return old;
+      const fresh=incomingById.get(String(old.id));
+      return fresh?{...old,...fresh,enrollmentStatus:'active'}:{...old,enrollmentStatus:'ended'};
     });
-    const usedIds=new Set(merged.map(st=>String(st.id)));
-    incoming.forEach(st=>{
-      const identity=rosterIdentity(st);
-      if(matchedIncoming.has(identity)||merged.some(x=>rosterIdentity(x)===identity))return;
-      let localId=String(st.id);
-      // Never let a reused incoming ID attach a different person to old attendance.
-      if(usedIds.has(localId)){
-        const base=`${localId}__${encodeURIComponent(identity)}`;
-        localId=base;let suffix=2;
-        while(usedIds.has(localId))localId=`${base}__${suffix++}`;
-      }
-      merged.push({...st,id:localId,identityKey:identity,enrollmentStatus:'active'});
-      usedIds.add(localId);
-    });
+    const currentIds=new Set(current.map(st=>String(st.id)));
+    incoming.forEach(st=>{if(!currentIds.has(String(st.id)))merged.push({...st,enrollmentStatus:'active'});});
     const mergedIds=new Set();
     for(const st of merged){if(mergedIds.has(String(st.id)))throw new Error('更新後の名簿で生徒IDが重複します。');mergedIds.add(String(st.id));}
-    if(!confirm(`共通名簿（${incoming.length}人）を読み込みます。\\n登録内容を更新し、配布ファイルに含まれない同一教科・クラスの生徒は「在籍終了」とします。\\n既存生徒は教科・クラス・番号でも照合し、既存IDを維持します。\\n更新前に現在の名簿と出欠記録を暗号化バックアップします。\\n続けますか？`))return;
-    const backupInfo=await downloadPreRosterBackup();
-    if(!confirm(`名簿更新前バックアップをダウンロードしました。\\n名簿 ${backupInfo.students}人／出欠記録 ${backupInfo.records}件\\nダウンロードフォルダにファイルが保存されたことを確認しましたか？\\n確認できた場合のみ名簿更新を続けます。`))return;
-    // Transaction guard: never modify attendance records; roll back the roster if any verification fails.
-    const studentsBeforeImport=localStorage.getItem('v3students');
-    const recordsBeforeImport=localStorage.getItem('v3records');
-    try{
-      write('v3students',merged);
-      if(localStorage.getItem('v3records')!==recordsBeforeImport)throw new Error('出欠記録の不変確認に失敗しました。名簿更新を取り消します。');
-      const savedRoster=JSON.parse(localStorage.getItem('v3students')||'null');
-      if(!Array.isArray(savedRoster)||savedRoster.length!==merged.length)throw new Error('更新後の名簿を検証できません。名簿更新を取り消します。');
-      students=savedRoster;
-    }catch(commitError){
-      if(studentsBeforeImport===null)localStorage.removeItem('v3students');
-      else localStorage.setItem('v3students',studentsBeforeImport);
-      students=JSON.parse(studentsBeforeImport||'[]');
-      throw commitError;
-    }
+    if(!confirm(`共通名簿（${incoming.length}人）を読み込みます。\\n登録内容を更新し、配布ファイルに含まれない同一教科・クラスの生徒は「在籍終了」とします。\\n過去の出欠記録は変更しません。\\n続けますか？`))return;
+    students=merged;write('v3students',students);
     states={};renderFormation();renderCautions();
-    $('rosterMessage').textContent=`共通名簿を更新しました。登録対象：${incoming.length}人。過去の出欠記録は変更せず、既存生徒IDを維持しました。`;
-    alert('共通名簿を更新しました。過去の出欠記録は変更せず、既存生徒IDを維持しました。');
+    $('rosterMessage').textContent=`共通名簿を更新しました。登録対象：${incoming.length}人。過去の出欠記録は保持されています。`;
+    alert('共通名簿を更新しました。過去の出欠記録は変更していません。');
   }catch(err){$('rosterMessage').textContent='共通名簿を更新できませんでした：'+err.message;alert('共通名簿を更新できませんでした。\n'+err.message);}
   finally{e.target.value='';}
 });
@@ -828,7 +723,7 @@ $('backupSave').onclick=async()=>{
     const key=await getStoredKey();
     if(!key)throw new Error('先に「初回設定・再設定」から共通パスワードを設定してください。');
     const payload={
-      app:APP_BACKUP_ID,formatVersion:1,appVersion:'3.8.9',
+      app:APP_BACKUP_ID,formatVersion:1,appVersion:'3.8.3',
       exportedAt:new Date().toISOString(),deviceNumber:currentDeviceNumber(),
       data:{
         students:JSON.parse(localStorage.getItem('v3students')||'[]'),
@@ -890,30 +785,16 @@ $('backupFile').addEventListener('change',async(event)=>{
       $('backupMessage').textContent='復元をキャンセルしました。現在のデータは変更していません。';return;
     }
     const previous={};for(const k of APP_STORAGE_KEYS)previous[k]=localStorage.getItem(k);
-    const previousMemory={students,records,threshold,states:{...states}};
     try{
-      // Validate the candidate data before changing any persistent or in-memory state.
-      const nextStudents=parsed.data.students;
-      const nextRecords=parsed.data.records;
-      const nextThreshold=Number(parsed.data.threshold);
-      if(!Number.isFinite(nextThreshold))throw new Error('欠時数の基準値が正しくありません。');
-      localStorage.setItem('v3students',JSON.stringify(nextStudents));
-      localStorage.setItem('v3records',JSON.stringify(nextRecords));
-      localStorage.setItem('v3threshold',JSON.stringify(nextThreshold));
-      // Read-after-write check catches quota or storage failures before rendering.
-      if(localStorage.getItem('v3students')!==JSON.stringify(nextStudents) ||
-         localStorage.getItem('v3records')!==JSON.stringify(nextRecords) ||
-         localStorage.getItem('v3threshold')!==JSON.stringify(nextThreshold))
-        throw new Error('保存領域への書き込み確認に失敗しました。');
-      students=nextStudents;records=nextRecords;threshold=nextThreshold;states={};
+      localStorage.setItem('v3students',JSON.stringify(parsed.data.students));
+      localStorage.setItem('v3records',JSON.stringify(parsed.data.records));
+      localStorage.setItem('v3threshold',JSON.stringify(Number(parsed.data.threshold)));
+      students=parsed.data.students;records=parsed.data.records;threshold=Number(parsed.data.threshold);states={};
       renderFormation();renderCautions();if(typeof renderStats==='function')renderStats();
       $('backupMessage').textContent=`復元が完了しました。名簿 ${students.length}人、出欠記録 ${records.length}件を読み込みました。`;
       alert('バックアップから復元しました。');
     }catch(err){
-      // Roll back both persistent storage and the live in-memory model.
       for(const k of APP_STORAGE_KEYS){if(previous[k]===null)localStorage.removeItem(k);else localStorage.setItem(k,previous[k]);}
-      students=previousMemory.students;records=previousMemory.records;threshold=previousMemory.threshold;states=previousMemory.states;
-      try{renderFormation();renderCautions();if(typeof renderStats==='function')renderStats();}catch(_){/* keep original data even if UI refresh fails */}
       throw err;
     }
   }catch(e){$('backupMessage').textContent='復元できませんでした。現在のデータは変更していません。詳細：'+e.message;}
@@ -925,9 +806,7 @@ updatePasswordStatus();
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then(reg => {
-      reg.update().catch(() => {});
-    }).catch(err => {
+    navigator.serviceWorker.register('./sw.js').catch(err => {
       console.warn('オフライン利用の準備に失敗しました', err);
     });
   });
