@@ -24,7 +24,7 @@ button{font:inherit;cursor:pointer}.smallbtn{border:0;border-radius:10px;padding
 .roster-tap.pub{background:#eef5ff;border-color:#9bb8dc}.roster-tap.pub .roster-status{background:#d9e8fb}
 .roster-tap.stop{background:#fff7e8;border-color:#dfc17b}.roster-tap.stop .roster-status{background:#f8e8bf}\n#summaryTable th,#summaryTable td{border-bottom:1px solid var(--line);padding:10px 8px;text-align:center;font-size:13px}#summaryTable td:nth-child(2),#summaryTable th:nth-child(2){text-align:left}#summaryTable tbody tr{cursor:pointer}#summaryTable tbody tr:hover{background:#f1f7f3}.detail-group{padding:10px 0;border-bottom:1px solid var(--line)}.detail-group strong{display:block;margin-bottom:5px}.detail-dates{font-size:14px;line-height:1.7}
 
-/* v3.8.8: iPad/tablet registration form layout fix */
+/* v3.8.9: iPad/tablet registration form layout fix */
 @media (max-width: 1100px) {
   .reg-fields {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -110,7 +110,7 @@ button{font:inherit;cursor:pointer}.smallbtn{border:0;border-radius:10px;padding
 <div id="importPreview" class="hint" style="margin-top:12px">まだファイルが選択されていません。</div>
 <div class="actions" style="margin-top:14px"><button class="smallbtn" id="clearImport">選択解除</button><button class="primary" id="confirmImport" disabled>確認して一括登録</button></div>
 </section></section>
-<p class="foot">試作版 v3.8.8。名簿・出欠データはこのブラウザ内に保存されます。過去データ取込はCSVを端末内で処理します。端末番号の登録、週次バックアップの目安表示、初回に学校共通パスワードを設定すると、非抽出の暗号鍵を端末内に保存し、以後のバックアップ・復元時の入力を省略します。端末間同期は未実装です。実在する生徒情報での運用前に、学校の承認とセキュリティ実装が必要です。</p>
+<p class="foot">試作版 v3.8.9。名簿・出欠データはこのブラウザ内に保存されます。過去データ取込はCSVを端末内で処理します。端末番号の登録、週次バックアップの目安表示、初回に学校共通パスワードを設定すると、非抽出の暗号鍵を端末内に保存し、以後のバックアップ・復元時の入力を省略します。端末間同期は未実装です。実在する生徒情報での運用前に、学校の承認とセキュリティ実装が必要です。</p>
 </main>
 <script>
 const $=id=>document.getElementById(id),read=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},write=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
