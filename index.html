@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#123c35"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="授業出欠管理"><link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" href="./icon-192.png"><title>授業出欠管理 v3.8.4・画面整理版</title>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#123c35"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="授業出欠管理"><link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" href="./icon-192.png"><title>授業出欠管理 v3.9.1・期間一括変更版</title>
 <style>
 :root{--g:#123c35;--g2:#286b5a;--bg:#f1f5f2;--card:#fff;--ink:#17231f;--muted:#68766f;--line:#dfe8e2;--red:#c73535;--blue:#3269a8;--purple:#7452a5;--amber:#a96a00}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Meiryo",sans-serif}
 header{background:var(--g);color:white;padding:19px 22px 23px;border-radius:0 0 23px 23px}.brand{font-size:11px;letter-spacing:.14em;opacity:.8}.head{display:flex;justify-content:space-between;align-items:end;margin-top:7px}h1{font-size:25px;margin:0}.date{font-size:13px;opacity:.8}
 main{max-width:1200px;margin:16px auto 35px;padding:0 16px}.screen{display:none}.screen.active{display:block}.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 3px 14px #173d2a08}
-.homebuttons{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}.homebtn{min-height:130px;border:0;border-radius:20px;background:var(--g);color:#fff;font-size:24px;font-weight:800;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px}.homebtn:nth-child(2){background:var(--g2)}.homebtn small{font-size:12px;font-weight:500;opacity:.85}
+.homebuttons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:14px}.homebtn{min-height:130px;border:0;border-radius:20px;background:var(--g);color:#fff;font-size:24px;font-weight:800;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px}.homebtn:nth-child(2){background:var(--g2)}.homebtn:nth-child(3){background:#47735f}.homebtn small{font-size:12px;font-weight:500;opacity:.85}
 h2{font-size:18px;margin:0 0 13px}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.fields{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:12px}label{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}select,input{width:100%;padding:12px;border:1px solid var(--line);border-radius:11px;background:white;color:var(--ink);font-size:16px}
 button{font:inherit;cursor:pointer}.smallbtn{border:0;border-radius:10px;padding:10px 13px;background:#eaf1ed;color:var(--g);font-weight:700}.primary{border:0;border-radius:12px;padding:13px 16px;background:var(--g);color:#fff;font-weight:750}.back{margin-bottom:12px}.hint,.foot{font-size:12px;color:var(--muted);line-height:1.55}.homealerts{display:grid;gap:8px}#cautions{display:grid;gap:7px}.caution-guide{display:flex;gap:8px;flex-wrap:wrap;font-size:11px;color:#59675f;margin-bottom:2px}.caution-guide span{padding:4px 7px;border:1px solid #d9e3dd;border-radius:6px}.caution-guide .yellow-guide{background:#fff1a8;color:#c62828;border-color:#e3c85b}.caution-row{display:grid;grid-template-columns:minmax(130px,1.4fr) minmax(110px,1fr) 90px 120px;gap:10px;align-items:center;border:1px solid #d9e3dd;border-radius:9px;padding:10px 12px;background:transparent;color:#202820}.caution-row .caution-subject{font-size:12px;color:#56665d}.caution-row.level-six{color:#c62828}.caution-row.level-five{background:#fff1a8;color:#c62828;font-weight:850;border-color:#e3c85b}.caution-row .caution-count{text-align:center;font-variant-numeric:tabular-nums}.caution-head{display:grid;grid-template-columns:minmax(130px,1.4fr) minmax(110px,1fr) 90px 120px;gap:10px;padding:0 12px 5px;color:#64736a;font-size:12px;font-weight:750}.caution-head small{font-size:10px;font-weight:500;color:#64736a}@media(max-width:600px){.caution-row,.caution-head{grid-template-columns:1.2fr 1fr 64px 85px;gap:5px;padding-left:7px;padding-right:7px;font-size:12px}}
 .actions{display:flex;gap:9px;flex-wrap:wrap}.actions>*{flex:1}.summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}.summary-card{border-radius:13px;padding:10px 7px;text-align:center;background:#e6f4eb}.summary-card b{display:block;font-size:23px;line-height:1.2}.summary-card small{font-size:11px;font-weight:750}.summary-card.absbox{background:#ffebeb;color:var(--red)}.summary-card.pubbox{background:#eaf2ff;color:var(--blue)}.summary-card.stopbox{background:#f1eaff;color:var(--purple)}.legend{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.pill{border-radius:30px;padding:6px 10px;font-size:11px;font-weight:750}.present{background:#e6f4eb;color:#24794c}.absent{background:#ffebeb;color:var(--red)}.official{background:#eaf2ff;color:var(--blue)}.susp{background:#f1eaff;color:var(--purple)}
@@ -14,7 +14,7 @@ button{font:inherit;cursor:pointer}.smallbtn{border:0;border-radius:10px;padding
 .teacher-side{text-align:center;font-size:11px;color:#fff;background:#65766d;border-radius:7px;padding:5px;margin-top:8px;letter-spacing:.15em}
 .toggle{display:flex;gap:5px;background:#edf2ee;padding:4px;border-radius:12px}.toggle button{flex:1;border:0;background:transparent;padding:10px 8px;border-radius:9px;font-size:13px;font-weight:700;color:var(--muted)}.toggle button.on{background:#fff;color:var(--g);box-shadow:0 1px 4px #0001}
 .empty{text-align:center;padding:24px;color:var(--muted);font-size:13px}.cautionnote{font-size:11px;color:var(--muted);margin-top:9px}
-@media(max-width:650px){.summary-card{padding:8px 3px}.summary-card b{font-size:19px}.summary-card small{font-size:10px}.fields{grid-template-columns:1fr}.homebtn{font-size:19px;min-height:108px}.homebuttons{gap:8px}.seat-grid{grid-template-rows:repeat(5,66px);grid-auto-columns:76px;gap:5px}.seat{height:66px}.seat .nm{font-size:11px}}
+@media(max-width:650px){.period-line{display:grid;grid-template-columns:1fr 1fr}.summary-card{padding:8px 3px}.summary-card b{font-size:19px}.summary-card small{font-size:10px}.fields{grid-template-columns:1fr}.homebtn{font-size:19px;min-height:108px}.homebuttons{grid-template-columns:1fr;gap:8px}.seat-grid{grid-template-rows:repeat(5,66px);grid-auto-columns:76px;gap:5px}.seat{height:66px}.seat .nm{font-size:11px}}
 
 .nonpe-groups{display:grid;gap:16px;margin-top:10px}.nonpe-class{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fbfcfb}.nonpe-class-title{font-size:14px;font-weight:850;color:var(--g);margin-bottom:9px}.nonpe-scroll{overflow-x:auto;padding-bottom:5px}.roster-tap-list{display:grid;grid-template-rows:repeat(10,minmax(54px,auto));grid-auto-columns:minmax(132px,1fr);grid-auto-flow:column;gap:7px;min-width:max-content}.roster-tap{min-height:54px;padding:8px 9px}.roster-tap strong{font-size:14px}.roster-tap .roster-meta{font-size:11px}
 .roster-tap{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;gap:4px 8px;align-items:center;text-align:left;padding:12px;border:1px solid #cbd8d1;border-radius:10px;background:#fff;color:var(--ink);min-height:68px}
@@ -23,11 +23,35 @@ button{font:inherit;cursor:pointer}.smallbtn{border:0;border-radius:10px;padding
 .roster-tap.abs{background:#fff0ef;border-color:#d98b85}.roster-tap.abs .roster-status{background:#f8d7d4}
 .roster-tap.pub{background:#eef5ff;border-color:#9bb8dc}.roster-tap.pub .roster-status{background:#d9e8fb}
 .roster-tap.stop{background:#fff7e8;border-color:#dfc17b}.roster-tap.stop .roster-status{background:#f8e8bf}\n#summaryTable th,#summaryTable td{border-bottom:1px solid var(--line);padding:10px 8px;text-align:center;font-size:13px}#summaryTable td:nth-child(2),#summaryTable th:nth-child(2){text-align:left}#summaryTable tbody tr{cursor:pointer}#summaryTable tbody tr:hover{background:#f1f7f3}.detail-group{padding:10px 0;border-bottom:1px solid var(--line)}.detail-group strong{display:block;margin-bottom:5px}.detail-dates{font-size:14px;line-height:1.7}
+
+/* v3.9.0: lesson-period calendar and individual correction */
+.calendar-wrap{margin:12px 0;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.calendar-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.calendar-head strong{font-size:15px}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.calendar-weekday,.calendar-day{min-height:42px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px;font-size:13px}
+.calendar-weekday{min-height:25px;color:var(--muted);font-weight:700}
+.calendar-day{border:1px solid transparent;background:#f7f9f8;color:var(--text);cursor:pointer;gap:1px}
+.calendar-day.selected{border-color:var(--green);background:#eaf5ee;font-weight:700}
+.calendar-day.today{outline:1px solid #9ca3af}
+.calendar-day .mark{font-size:12px;line-height:1;color:#15803d;font-weight:800;min-height:13px}
+.calendar-day.empty{background:transparent;cursor:default}
+.calendar-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;color:var(--muted);font-size:12px}
+.period-line{display:flex;gap:8px;align-items:end;flex-wrap:wrap}
+.period-line>div{flex:1;min-width:130px}
+.edit-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(125px,160px);gap:10px;align-items:center;padding:9px 4px;border-bottom:1px solid var(--line)}
+.edit-row:last-child{border-bottom:0}
+.edit-name{font-weight:600;font-size:14px}
+.edit-meta{font-size:12px;color:var(--muted)}
+.edit-row select{width:100%;min-width:0}
+.edit-note{padding:10px;border-radius:9px;background:#f3f6f4;color:var(--muted);font-size:13px;margin:8px 0}
+@media(max-width:520px){.calendar-day{min-height:38px}.edit-row{grid-template-columns:minmax(0,1fr) 128px;gap:6px}.edit-name{font-size:13px}}
+
 </style></head><body>
 <header><div class="brand">CLASSROOM TOOLS</div><div class="head"><h1>授業出欠管理</h1><div class="date" id="today"></div></div></header>
 <main>
 <section id="home" class="screen active">
-<div class="homebuttons"><button type="button" class="homebtn" id="goReg">出欠登録<small>合同クラス・男女別整列で入力</small></button><button type="button" class="homebtn" id="goSummaryHome">出欠統計<small>生徒別の出欠状況を確認</small></button></div>
+<div class="homebuttons"><button type="button" class="homebtn" id="goReg">出欠登録<small>授業ごとの出欠を入力</small></button><button type="button" class="homebtn" id="goSummaryHome">出欠統計<small>生徒別の出欠状況を確認</small></button><button type="button" class="homebtn" id="goBulkChange">出欠変更<small>生徒を選んで期間を一括変更</small></button></div>
 <section class="panel"><div class="row"><h2>欠席日数 CAUTION</h2><button class="smallbtn" id="thresholdBtn">基準設定</button></div><div id="cautions" class="homealerts"></div><div class="cautionnote">欠席のみを集計。公欠・出席停止は欠席日数に含めません。初期注意基準は5日（4日以上で表示）です。</div></section>
 <section class="panel"><h2>設定</h2><p class="hint">過去の出欠データの取り込みや、名簿・バックアップに関する操作を行います。</p><button class="primary" id="goSettings">設定を開く</button></section>
 </section>
@@ -60,11 +84,24 @@ button{font:inherit;cursor:pointer}.smallbtn{border:0;border-radius:10px;padding
 <div id="backupMessage" class="hint" style="margin-top:8px">名簿・出欠記録・欠時数の設定を、JSONファイル1つに保存／復元できます。</div><div class="hint" style="margin-top:6px;padding:9px 10px;border-radius:9px;background:#eef4f0">共通パスワード運用：学校で定めた同じパスワードを、すべての教員用iPadのバックアップ保存・復元時に使用してください。パスワードはアプリ内には保存されません。</div><div id="backupScheduleStatus" class="hint" style="margin-top:5px"></div><div id="rosterMessage" class="hint" style="margin-top:10px">登録名簿：読み込み状況を確認してください。</div><p class="hint">PCで名簿を一元管理し、「共通名簿配布ファイルを出力」で全端末共通の暗号化ファイルを作成します。各iPadでは「共通名簿を更新」から読み込みます。名簿更新では出欠記録を変更しません。</p></section>
 </section>
 <section id="reg" class="screen"><button class="smallbtn back" data-home>← ホーム</button>
-<section class="panel"><h2>① 出欠登録</h2><div class="fields"><div><label>授業（合同クラス）</label><select id="course"></select></div><div><label>授業日</label><input type="date" id="date"></div><div><label>単位数</label><input id="units" readonly></div></div><p class="hint" id="courseInfo"></p></section>
-<section class="panel"><div class="row"><h2 style="margin:0">整列タップ入力</h2><span id="total" class="hint"></span></div><div class="summary-grid" id="regSummary"><div class="summary-card"><b id="regPresent">0</b><small>出席</small></div><div class="summary-card absbox"><b id="regAbsent">0</b><small>欠席</small></div><div class="summary-card pubbox"><b id="regOfficial">0</b><small>公欠</small></div><div class="summary-card stopbox"><b id="regSusp">0</b><small>出席停止</small></div></div><div class="legend"><span class="pill present">出席</span><span class="pill absent">欠席</span><span class="pill official">公欠</span><span class="pill susp">出席停止</span></div><p class="hint">体育は各クラス・男女ごとに縦5人ずつ配置します。保健・選択体育は各クラスごとに番号順で縦10人ずつ配置します。タップ順：出席 → 欠席 → 公欠 → 出席停止 → 出席。</p><div id="formation"></div><div class="actions" style="margin-top:15px"><button class="smallbtn" id="reset">全員出席に戻す</button><button class="primary" id="save">この授業を保存</button></div></section></section>
+<section class="panel"><h2>① 出欠登録</h2><div class="fields"><div><label>授業（合同クラス）</label><select id="course"></select></div><div><label>授業日</label><input type="date" id="date"></div><div><label>時限</label><select id="period"></select></div><div><label>単位数</label><input id="units" readonly></div></div><p class="hint" id="courseInfo"></p><div class="calendar-wrap"><div class="calendar-head"><button type="button" class="smallbtn" id="calendarPrev">‹ 前月</button><strong id="calendarMonth"></strong><button type="button" class="smallbtn" id="calendarNext">翌月 ›</button></div><div class="calendar-grid" id="courseCalendar"></div><div class="calendar-legend"><span>○：1コマ入力済み</span><span>◎：2コマ以上入力済み</span></div></div></section>
+<section class="panel"><div class="row"><h2 style="margin:0">整列タップ入力</h2><span id="total" class="hint"></span></div><div class="summary-grid" id="regSummary"><div class="summary-card"><b id="regPresent">0</b><small>出席</small></div><div class="summary-card absbox"><b id="regAbsent">0</b><small>欠席</small></div><div class="summary-card pubbox"><b id="regOfficial">0</b><small>公欠</small></div><div class="summary-card stopbox"><b id="regSusp">0</b><small>出席停止</small></div></div><div class="legend"><span class="pill present">出席</span><span class="pill absent">欠席</span><span class="pill official">公欠</span><span class="pill susp">出席停止</span></div><p class="hint">体育は各クラス・男女ごとに縦5人ずつ配置します。保健・選択体育は各クラスごとに番号順で縦10人ずつ配置します。タップ順：出席 → 欠席 → 公欠 → 出席停止 → 出席。</p><div id="formation"></div><div class="actions" style="margin-top:15px"><button class="smallbtn" id="reset">全員出席に戻す</button><button class="smallbtn" id="openIndividualEdit">保存済み記録を個別修正</button><button class="primary" id="save">この授業を保存</button></div></section></section>
+<section id="editRecord" class="screen"><button class="smallbtn back" data-home>← ホーム</button>
+<section class="panel"><h2>出欠の個別修正</h2><div class="fields"><div><label>授業</label><select id="editCourse"></select></div><div><label>授業日</label><input type="date" id="editDate"></div><div><label>時限</label><select id="editPeriod"></select></div></div><div id="editRecordInfo" class="edit-note">授業・日付・時限を選択してください。</div><div id="editRows"></div><div class="actions" style="margin-top:14px"><button class="smallbtn" id="cancelEdit" type="button">戻る</button><button class="primary" id="saveIndividualEdit" type="button" disabled>変更した生徒だけ保存</button></div></section></section>
+<section id="bulkChange" class="screen"><button class="smallbtn back" data-home>← ホーム</button>
+<section class="panel"><h2>出欠変更（生徒・期間を指定）</h2>
+<p class="hint">対象生徒の、指定した期間内に保存されている授業記録だけをまとめて変更します。授業のない日や未保存のコマには新しい記録を作りません。</p>
+<div class="fields"><div><label for="bulkClass">クラス名</label><select id="bulkClass"></select></div><div><label for="bulkStudent">対象生徒</label><select id="bulkStudent"></select></div><div><label for="bulkStatus">変更後の出欠状況</label><select id="bulkStatus"><option>公欠</option><option>出席停止</option><option>欠席</option><option>出席</option></select></div></div>
+<div class="period-line" style="margin-top:14px"><div><label for="bulkStartDate">開始日</label><input type="date" id="bulkStartDate"></div><div><label for="bulkStartPeriod">開始時限</label><select id="bulkStartPeriod"></select></div><div><label for="bulkEndDate">終了日</label><input type="date" id="bulkEndDate"></div><div><label for="bulkEndPeriod">終了時限</label><select id="bulkEndPeriod"></select></div></div>
+<p class="hint">期間は開始日時・終了日時を含みます。期間中の中間日は、保存済みの全時限が対象です。時限未設定の過去記録は、対象時限を特定できないため一括変更から除外します。</p>
+<div class="actions" style="margin-top:12px"><button class="smallbtn" id="bulkPreview" type="button">変更対象を確認</button><button class="primary" id="bulkApply" type="button" disabled>確認した記録を一括変更</button></div>
+<div id="bulkPreviewResult" class="edit-note" style="margin-top:12px">クラス・生徒・期間を指定して「変更対象を確認」を押してください。</div>
+<div id="bulkPreviewRows"></div>
+<div id="bulkChangeMessage" class="hint" style="margin-top:10px"></div>
+</section></section>
 <section id="summary" class="screen"><button class="smallbtn back" data-home>← ホーム</button>
 <section class="panel"><h2>出欠統計</h2><div class="fields"><div><label>教科</label><select id="summarySubject"><option value="体育">体育</option><option value="保健">保健</option><option value="選択体育">選択体育</option></select></div><div><label>クラス</label><select id="summaryClass"></select></div><div style="display:flex;align-items:end"><button class="primary" id="summaryExport" style="width:100%">この集計をCSV出力</button></div></div>
-<p class="hint">授業実施時数は、保存された授業日数（同じ授業・同じ日付の重複保存は1回）です。欠席・公欠・出席停止はそれぞれの該当時数を表示します。</p></section>
+<p class="hint">授業実施時数は保存された授業コマ数です。時限未設定の過去記録は1記録を1コマとして扱います。欠席・公欠・出席停止はそれぞれの該当時数を表示します。</p></section>
 <section class="panel"><div class="row"><h2 style="margin:0">生徒別集計</h2><span id="summaryCount" class="hint"></span></div><div class="toggle" style="margin:10px 0 12px"><button class="on" id="summaryNumberSort" type="button">出席番号順</button><button id="summaryGenderSort" type="button">男女別出席番号順</button></div><div style="overflow-x:auto"><table id="summaryTable" style="width:100%;border-collapse:collapse;min-width:680px"><thead><tr style="background:#edf3ef"><th style="padding:10px;text-align:left">番号</th><th style="padding:10px;text-align:left">氏名</th><th style="padding:10px">授業実施時数</th><th style="padding:10px">欠席時数</th><th style="padding:10px">公欠時数</th><th style="padding:10px">出席停止時数</th></tr></thead><tbody id="summaryRows"></tbody></table></div><p class="hint">生徒の行を選択すると、その生徒の欠席日・公欠日・出席停止日を確認できます。</p></section>
 <section class="panel" id="studentDetail" style="display:none"><h2 id="detailName">生徒の詳細</h2><div id="detailDates"></div></section>
 </section>
@@ -76,7 +113,7 @@ button{font:inherit;cursor:pointer}.smallbtn{border:0;border-radius:10px;padding
 <div id="importPreview" class="hint" style="margin-top:12px">まだファイルが選択されていません。</div>
 <div class="actions" style="margin-top:14px"><button class="smallbtn" id="clearImport">選択解除</button><button class="primary" id="confirmImport" disabled>確認して一括登録</button></div>
 </section></section>
-<p class="foot">試作版 v3.8.4。名簿・出欠データはこのブラウザ内に保存されます。過去データ取込はCSVを端末内で処理します。端末番号の登録、週次バックアップの目安表示、初回に学校共通パスワードを設定すると、非抽出の暗号鍵を端末内に保存し、以後のバックアップ・復元時の入力を省略します。端末間同期は未実装です。実在する生徒情報での運用前に、学校の承認とセキュリティ実装が必要です。</p>
+<p class="foot">試作版 v3.9.1。名簿・出欠データはこのブラウザ内に保存されます。過去データ取込はCSVを端末内で処理します。端末番号の登録、週次バックアップの目安表示、初回に学校共通パスワードを設定すると、非抽出の暗号鍵を端末内に保存し、以後のバックアップ・復元時の入力を省略します。端末間同期は未実装です。実在する生徒情報での運用前に、学校の承認とセキュリティ実装が必要です。</p>
 </main>
 <script>
 const $=id=>document.getElementById(id),read=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},write=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
@@ -95,9 +132,11 @@ if(!Array.isArray(students)){students=DEFAULT_ROSTER;write('v3students',students
 let records=read('v3records',[]),threshold=read('v3threshold',5),states={};
 const d=new Date(),today=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
 $('today').textContent=d.toLocaleDateString('ja-JP',{month:'long',day:'numeric',weekday:'short'});$('date').value=today;
+let calendarMonth=new Date(d.getFullYear(),d.getMonth(),1);
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));const target=$(id);if(!target){alert('画面の読み込みに失敗しました。ページを再読み込みしてください。');return;}target.classList.add('active');if(id==='home')renderCautions()}
 $('goReg').addEventListener('click',()=>show('reg'));
+$('goBulkChange').addEventListener('click',openBulkChange);
 function openSummary(){prepareSummaryClasses();show('summary');renderSummary()}
 $('goSummaryHome').addEventListener('click',openSummary);$('goSettings').addEventListener('click',()=>show('settings'));$('settingsHistory').addEventListener('click',()=>show('import'));$('settingsRoster').addEventListener('click',()=>show('rosterSettings'));document.querySelectorAll('[data-home]').forEach(b=>b.onclick=()=>show('home'));document.querySelectorAll('[data-settings]').forEach(b=>b.onclick=()=>show('settings'));
 function course(id){return COURSES.find(c=>c.id===id)||COURSES[0]}
@@ -109,6 +148,110 @@ function courseStudents(c){
 }
 function members(c){return c.classes.map(cls=>({cls,list:students.filter(s=>s.enrollmentStatus!=='ended'&&s.cls===cls&&(s.subject||'体育')==='体育')})).filter(g=>g.list.length)}
 function status(s){return states[s.id]||'出席'}
+function slotPeriod(r){return Number.isInteger(Number(r.period))&&Number(r.period)>=1?Number(r.period):null;}
+function slotKey(r){return `${r.courseId}|${r.date}|${slotPeriod(r)??'legacy'}`;}
+function latestRecordsBySlot(list){const m=new Map();list.forEach(r=>m.set(slotKey(r),r));return [...m.values()];}
+function recordsForCourseDate(courseId,date){return latestRecordsBySlot(records.filter(r=>r.courseId===courseId&&r.date===date));}
+function findSlotRecord(courseId,date,period){return latestRecordsBySlot(records.filter(r=>r.courseId===courseId&&r.date===date)).find(r=>(slotPeriod(r)??'legacy')===(period??'legacy'))||null;}
+function maxPeriodForDate(date){const dt=new Date(date+'T12:00:00');return dt.getDay()===4?7:6;}
+function updatePeriodOptions(){const sel=$('period');if(!sel)return;const date=$('date').value||today,max=maxPeriodForDate(date),current=Number(sel.value)||1;sel.innerHTML=Array.from({length:max},(_,i)=>`<option value="${i+1}">${i+1}時間目</option>`).join('');sel.value=String(Math.min(current,max));}
+function loadRegistrationStates(){const rec=findSlotRecord($('course').value,$('date').value,Number($('period').value)||1);states={};if(rec)rec.statuses.forEach(x=>states[x.id]=x.status);}
+function renderCourseCalendar(){
+ const host=$('courseCalendar');if(!host)return;const cId=$('course').value,year=calendarMonth.getFullYear(),month=calendarMonth.getMonth();
+ $('calendarMonth').textContent=`${year}年${month+1}月`;const first=new Date(year,month,1),start=first.getDay(),days=new Date(year,month+1,0).getDate();
+ const headers=['日','月','火','水','木','金','土'];let html=headers.map(x=>`<div class="calendar-weekday">${x}</div>`).join('');
+ for(let i=0;i<start;i++)html+='<div class="calendar-day empty"></div>';
+ for(let day=1;day<=days;day++){const date=`${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`,count=recordsForCourseDate(cId,date).length,mark=count>=2?'◎':count===1?'○':'',cls=[date===$('date').value?'selected':'',date===today?'today':''].filter(Boolean).join(' ');html+=`<button type="button" class="calendar-day ${cls}" data-date="${date}"><span>${day}</span><span class="mark">${mark}</span></button>`;}
+ host.innerHTML=html;host.querySelectorAll('button[data-date]').forEach(b=>b.onclick=()=>{$('date').value=b.dataset.date;updatePeriodOptions();loadRegistrationStates();renderFormation();renderCourseCalendar();});
+}
+function refreshRegistration(){updatePeriodOptions();loadRegistrationStates();renderFormation();renderCourseCalendar();}
+function updateEditPeriodOptions(){const date=$('editDate').value||today,sel=$('editPeriod');const old=sel.value;const max=maxPeriodForDate(date);const opts=[];if(records.some(r=>r.courseId===$('editCourse').value&&r.date===date&&slotPeriod(r)===null))opts.push('<option value="legacy">時限未設定（過去記録）</option>');for(let i=1;i<=max;i++)opts.push(`<option value="${i}">${i}時間目</option>`);sel.innerHTML=opts.join('');if([...sel.options].some(o=>o.value===old))sel.value=old;else sel.value=opts.length?sel.options[0].value:'1';}
+function renderEditRows(){const c=course($('editCourse').value),date=$('editDate').value,raw=$('editPeriod').value,period=raw==='legacy'?null:Number(raw),rec=findSlotRecord(c.id,date,period);const host=$('editRows'),info=$('editRecordInfo'),save=$('saveIndividualEdit');if(!rec){info.textContent='この授業・日付・時限の保存済み記録はありません。';host.innerHTML='';save.disabled=true;return;}const savedStatuses=rec.statuses||[];info.textContent=`${c.label} ／ ${date} ／ ${period===null?'時限未設定（過去記録）':period+'時間目'} ／ ${savedStatuses.length}人分。変更した生徒だけを保存します。`;host.innerHTML=savedStatuses.map(item=>{const st=students.find(x=>x.id===item.id)||item,value=item.status||'出席';return `<div class="edit-row" data-student="${esc(item.id)}"><div><div class="edit-name">${esc(st.cls)} ${esc(st.no)}番 ${esc(st.name)}</div><div class="edit-meta">現在：${esc(value)}</div></div><select aria-label="${esc(st.name)}の出欠状況"><option ${value==='出席'?'selected':''}>出席</option><option ${value==='欠席'?'selected':''}>欠席</option><option ${value==='公欠'?'selected':''}>公欠</option><option ${value==='出席停止'?'selected':''}>出席停止</option></select></div>`;}).join('');save.disabled=savedStatuses.length===0;}
+function openIndividualEdit(){const cId=$('course').value,date=$('date').value,period=$('period').value;$('editCourse').value=cId;$('editDate').value=date;updateEditPeriodOptions();$('editPeriod').value=period;renderEditRows();show('editRecord');}
+function saveIndividualChanges(){const c=course($('editCourse').value),date=$('editDate').value,raw=$('editPeriod').value,period=raw==='legacy'?null:Number(raw);const rec=findSlotRecord(c.id,date,period);if(!rec)return alert('修正対象の記録が見つかりません。');let changed=0;document.querySelectorAll('#editRows .edit-row').forEach(row=>{const id=row.dataset.student,value=row.querySelector('select').value,item=rec.statuses.find(x=>x.id===id);if(item&&item.status!==value){item.status=value;changed++;}});if(!changed){alert('変更された生徒はいません。');return;}write('v3records',records);renderCautions();renderCourseCalendar();renderEditRows();alert(`${changed}人分の出欠を修正しました。ほかの生徒の記録は変更していません。`);}
+function clearBulkPreview(message='条件を変更しました。あらためて「変更対象を確認」してください。'){
+ $('bulkApply').disabled=true;$('bulkPreviewRows').innerHTML='';$('bulkPreviewResult').textContent=message;bulkChangePlan=null;
+}
+let bulkChangePlan=null;
+function fillBulkClasses(){
+ const classes=[...new Set(students.filter(st=>st.enrollmentStatus!=='ended').map(st=>String(st.cls||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ja'));
+ $('bulkClass').innerHTML=classes.map(cls=>`<option value="${esc(cls)}">${esc(cls)}</option>`).join('');
+ if(!classes.length)$('bulkClass').innerHTML='<option value="">名簿がありません</option>';
+ fillBulkStudents();
+}
+function fillBulkStudents(){
+ const cls=$('bulkClass').value;
+ const roster=students.filter(st=>st.enrollmentStatus!=='ended'&&String(st.cls)===cls).sort((a,b)=>(Number(a.no)||9999)-(Number(b.no)||9999)||String(a.name).localeCompare(String(b.name),'ja'));
+ $('bulkStudent').innerHTML=roster.map(st=>`<option value="${esc(st.id)}">${esc(st.no)}番 ${esc(st.name)}</option>`).join('');
+ if(!roster.length)$('bulkStudent').innerHTML='<option value="">対象生徒がいません</option>';
+}
+function fillBulkPeriodOptions(which){
+ const date=$(`bulk${which}Date`).value||today,sel=$(`bulk${which}Period`),old=Number(sel.value)|| (which==='Start'?1:maxPeriodForDate(date)),max=maxPeriodForDate(date);
+ sel.innerHTML=Array.from({length:max},(_,i)=>`<option value="${i+1}">${i+1}時間目</option>`).join('');
+ sel.value=String(Math.min(old,max));
+}
+function openBulkChange(){
+ fillBulkClasses();
+ $('bulkStartDate').value=today;$('bulkEndDate').value=today;
+ fillBulkPeriodOptions('Start');fillBulkPeriodOptions('End');
+ $('bulkStartPeriod').value='1';$('bulkEndPeriod').value=String(maxPeriodForDate(today));
+ $('bulkStatus').value='公欠';clearBulkPreview('クラス・生徒・期間を指定して「変更対象を確認」を押してください。');
+ $('bulkChangeMessage').textContent='';show('bulkChange');
+}
+function buildBulkChangePlan(){
+ const cls=$('bulkClass').value,studentId=$('bulkStudent').value,startDate=$('bulkStartDate').value,endDate=$('bulkEndDate').value;
+ const startPeriod=Number($('bulkStartPeriod').value),endPeriod=Number($('bulkEndPeriod').value),newStatus=$('bulkStatus').value;
+ const student=students.find(st=>String(st.id)===String(studentId)&&String(st.cls)===String(cls)&&st.enrollmentStatus!=='ended');
+ if(!student)throw new Error('対象生徒を選択してください。');
+ if(!startDate||!endDate)throw new Error('開始日と終了日を選択してください。');
+ if(startDate>endDate)throw new Error('終了日は開始日以降にしてください。');
+ if(!startPeriod||startPeriod>maxPeriodForDate(startDate))throw new Error('開始時限がその曜日の時間割の範囲外です。');
+ if(!endPeriod||endPeriod>maxPeriodForDate(endDate))throw new Error('終了時限がその曜日の時間割の範囲外です。');
+ if(startDate===endDate&&startPeriod>endPeriod)throw new Error('同じ日の場合、終了時限は開始時限以降にしてください。');
+ const latest=latestRecordsBySlot(records),matches=[],legacy=[];
+ latest.forEach(rec=>{
+  if(!rec.date||rec.date<startDate||rec.date>endDate)return;
+  const item=(rec.statuses||[]).find(x=>String(x.id)===String(student.id));
+  if(!item)return;
+  const period=slotPeriod(rec);
+  if(period===null){legacy.push(rec);return;}
+  if(rec.date===startDate&&period<startPeriod)return;
+  if(rec.date===endDate&&period>endPeriod)return;
+  matches.push({rec,item,oldStatus:item.status||'出席'});
+ });
+ const changed=matches.filter(x=>x.oldStatus!==newStatus).length;
+ return {student,cls,startDate,endDate,startPeriod,endPeriod,newStatus,matches,legacy,changed,unchanged:matches.length-changed};
+}
+function renderBulkPreview(plan){
+ const s=plan.student;
+ $('bulkPreviewResult').innerHTML=`<strong>${esc(s.cls)} ${esc(s.no)}番 ${esc(s.name)}</strong><br>${esc(plan.startDate)} ${plan.startPeriod}時間目 ～ ${esc(plan.endDate)} ${plan.endPeriod}時間目<br><strong>対象記録：${plan.matches.length}コマ ／ 実際に変更：${plan.changed}コマ</strong><br>すでに変更後と同じ：${plan.unchanged}コマ ／ 時限未設定の旧記録（除外）：${plan.legacy.length}件`;
+ if(!plan.matches.length){$('bulkPreviewRows').innerHTML='<div class="empty">指定期間内に、この生徒の時限付き出欠記録はありません。</div>';return;}
+ const rows=plan.matches.slice().sort((a,b)=>a.rec.date.localeCompare(b.rec.date)||slotPeriod(a.rec)-slotPeriod(b.rec)||String(a.rec.label||'').localeCompare(String(b.rec.label||''),'ja'));
+ $('bulkPreviewRows').innerHTML='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:440px"><thead><tr style="background:#edf3ef"><th style="padding:8px;text-align:left">日付・時限</th><th style="padding:8px;text-align:left">授業</th><th style="padding:8px">現在</th><th style="padding:8px">変更後</th></tr></thead><tbody>'+rows.map(x=>`<tr><td style="padding:8px;border-bottom:1px solid var(--line)">${esc(x.rec.date)}・${slotPeriod(x.rec)}時間目</td><td style="padding:8px;border-bottom:1px solid var(--line)">${esc(x.rec.label||course(x.rec.courseId).label)}</td><td style="padding:8px;text-align:center;border-bottom:1px solid var(--line)">${esc(x.oldStatus)}</td><td style="padding:8px;text-align:center;border-bottom:1px solid var(--line)">${esc(plan.newStatus)}</td></tr>`).join('')+'</tbody></table></div>';
+}
+function previewBulkChange(){
+ try{bulkChangePlan=buildBulkChangePlan();renderBulkPreview(bulkChangePlan);$('bulkApply').disabled=bulkChangePlan.changed===0;if(bulkChangePlan.changed===0)$('bulkChangeMessage').textContent='変更が必要な記録はありません。';else $('bulkChangeMessage').textContent='一覧を確認し、内容に間違いがなければ一括変更を実行してください。';}
+ catch(e){clearBulkPreview(e.message);$('bulkChangeMessage').textContent='';}
+}
+function applyBulkChange(){
+ let plan;try{plan=buildBulkChangePlan();}catch(e){clearBulkPreview(e.message);return;}
+ if(!plan.changed){alert('変更が必要な記録はありません。');return;}
+ if(!confirm(`${plan.student.cls} ${plan.student.no}番 ${plan.student.name} さん\n${plan.startDate} ${plan.startPeriod}時間目 ～ ${plan.endDate} ${plan.endPeriod}時間目\n対象 ${plan.matches.length}コマのうち ${plan.changed}コマを「${plan.newStatus}」に変更します。\n\n対象一覧を確認しましたか？ 実行しますか？`))return;
+ let changed=0;
+ plan.matches.forEach(x=>{if(x.item.status!==plan.newStatus){x.item.status=plan.newStatus;changed++;}});
+ write('v3records',records);
+ renderCautions();renderCourseCalendar();
+ if($('summary').classList.contains('active'))renderSummary();
+ previewBulkChange();
+ $('bulkChangeMessage').textContent=`変更完了：${plan.student.name} さんの ${changed}コマを「${plan.newStatus}」に変更しました。ほかの生徒の記録や、指定期間外の記録は変更していません。`;
+ alert(`${changed}コマの出欠を変更しました。`);
+}
+$('bulkClass').addEventListener('change',()=>{fillBulkStudents();clearBulkPreview();});
+['bulkStudent','bulkStatus','bulkStartDate','bulkEndDate','bulkStartPeriod','bulkEndPeriod'].forEach(id=>$(id).addEventListener('change',()=>clearBulkPreview()));
+$('bulkStartDate').addEventListener('change',()=>{fillBulkPeriodOptions('Start');clearBulkPreview();});
+$('bulkEndDate').addEventListener('change',()=>{fillBulkPeriodOptions('End');clearBulkPreview();});
+$('bulkPreview').addEventListener('click',previewBulkChange);
+$('bulkApply').addEventListener('click',applyBulkChange);
 function updateRegSummary(){
  const all=courseStudents(course($('course').value));
  const counts={'出席':0,'欠席':0,'公欠':0,'出席停止':0};
@@ -161,8 +304,9 @@ function renderFormation(){
  });
  updateRegSummary();
 }
-$('course').onchange=()=>{states={};renderFormation()};$('date').onchange=()=>{states={};renderFormation()};$('reset').onclick=()=>{states={};renderFormation()};
-$('save').onclick=()=>{let c=course($('course').value),all=courseStudents(c);if(!all.length)return alert('対象クラスの名簿を読み込んでください。');let rec={id:'r'+Date.now(),courseId:c.id,label:c.label,subject:c.subject,units:c.units,date:$('date').value,statuses:all.map(s=>({id:s.id,cls:s.cls,no:s.no,name:s.name,gender:s.gender,status:status(s)}))};records.push(rec);write('v3records',records);alert('出欠を保存しました。')};
+$('course').onchange=()=>{refreshRegistration()};$('date').onchange=()=>{updatePeriodOptions();loadRegistrationStates();renderFormation();calendarMonth=new Date(($('date').value||today)+'T12:00:00');calendarMonth.setDate(1);renderCourseCalendar()};$('period').onchange=()=>{loadRegistrationStates();renderFormation()};$('reset').onclick=()=>{states={};renderFormation()};$('openIndividualEdit').onclick=openIndividualEdit;$('calendarPrev').onclick=()=>{calendarMonth.setMonth(calendarMonth.getMonth()-1);renderCourseCalendar()};$('calendarNext').onclick=()=>{calendarMonth.setMonth(calendarMonth.getMonth()+1);renderCourseCalendar()};
+$('save').onclick=()=>{let c=course($('course').value),all=courseStudents(c),date=$('date').value,period=Number($('period').value);if(!all.length)return alert('対象クラスの名簿を読み込んでください。');if(!date||!period)return alert('授業日と時限を選択してください。');let existing=findSlotRecord(c.id,date,period);let rec=existing||{id:'r'+Date.now(),courseId:c.id,label:c.label,subject:c.subject,units:c.units,date,period,statuses:[]};rec.period=period;rec.statuses=all.map(s=>({id:s.id,cls:s.cls,no:s.no,name:s.name,gender:s.gender,status:status(s)}));if(existing){const idx=records.findIndex(r=>r.id===existing.id);if(idx>=0)records[idx]=rec;}else records.push(rec);write('v3records',records);renderCourseCalendar();alert(`${c.label}・${date}・${period}時間目の出欠を保存しました。`)};
+$('editCourse').innerHTML=COURSES.map(c=>`<option value="${c.id}">${esc(c.label)}</option>`).join('');$('editCourse').onchange=()=>{updateEditPeriodOptions();renderEditRows()};$('editDate').onchange=()=>{updateEditPeriodOptions();renderEditRows()};$('editPeriod').onchange=renderEditRows;$('saveIndividualEdit').onclick=saveIndividualChanges;$('cancelEdit').onclick=()=>show('reg');
 function subjectForRecord(r){
  if(r.subject)return r.subject;
  const c=COURSES.find(x=>x.id===r.courseId);
@@ -175,12 +319,7 @@ function prepareSummaryClasses(){
  if(!classes.length)$('summaryClass').innerHTML='<option value="">名簿なし</option>';
 }
 function summaryRecords(subject,cls){
- const latest=new Map();
- records.filter(r=>subjectForRecord(r)===subject).sort((a,b)=>String(a.date).localeCompare(String(b.date))).forEach(r=>{
-  const key=`${r.courseId}|${r.date}`;
-  latest.set(key,r);
- });
- return [...latest.values()].filter(r=>r.statuses.some(st=>st.cls===cls));
+ return latestRecordsBySlot(records.filter(r=>subjectForRecord(r)===subject)).filter(r=>r.statuses.some(st=>st.cls===cls));
 }
 function renderSummary(){
  const subject=$('summarySubject').value,cls=$('summaryClass').value;
@@ -201,8 +340,8 @@ function renderSummary(){
 function showStudentDetail(id,subject,cls,recs){
  const st=students.find(x=>x.id===id);if(!st)return;
  const dates={'欠席':[],'公欠':[],'出席停止':[]};
- recs.forEach(r=>{const x=r.statuses.find(y=>y.id===id);if(x&&dates[x.status])dates[x.status].push(r.date);});
- const fmt=d=>{const [y,m,day]=d.split('-');return `${Number(m)}/${Number(day)}`;};
+ recs.forEach(r=>{const x=r.statuses.find(y=>y.id===id);if(x&&dates[x.status])dates[x.status].push(`${r.date}${slotPeriod(r)?'（'+slotPeriod(r)+'時間目）':'（時限未設定）'}`);});
+ const fmt=d=>{const m=d.match(/^(\d{4})-(\d{2})-(\d{2})(.*)$/);return m?`${Number(m[2])}/${Number(m[3])}${m[4]}`:d;};
  $('detailName').textContent=`${st.cls} ${st.no}番 ${st.name} の出欠日`;
  $('detailDates').innerHTML=Object.entries(dates).map(([label,ds])=>`<div class="detail-group"><strong>${label}（${ds.length}時数）</strong><div class="detail-dates">${ds.length?ds.sort().map(fmt).join('、'):'該当なし'}</div></div>`).join('');
  $('studentDetail').style.display='block';
@@ -246,16 +385,13 @@ function renderCautions(){
  const rows=[];
  for(const c of COURSES){
   const limits=ABSENCE_LIMITS[c.units];if(!limits)continue;
-  const latest=new Map();
-  records.filter(r=>r.courseId===c.id).sort((a,b)=>String(a.date).localeCompare(String(b.date))).forEach(r=>latest.set(r.date,r));
-  const courseRecords=[...latest.values()];
+  const courseRecords=latestRecordsBySlot(records.filter(r=>r.courseId===c.id));
   for(const st of courseRoster(c)){
-   const absences=new Set();
+   let count=0;
    courseRecords.forEach(r=>{
     const item=r.statuses.find(x=>x.id===st.id);
-    if(item&&item.status==='欠席')absences.add(r.date);
+    if(item&&item.status==='欠席')count++;
    });
-   const count=absences.size;
    if(count<limits.oneSeventh)continue;
    const level=count>=limits.oneFifth?'level-five':count>=limits.oneSixth?'level-six':'';
    rows.push({student:st,course:c,count,remaining:Math.max(0,limits.oneThird-count),level});
@@ -290,7 +426,7 @@ $('downloadHistoryTemplate').addEventListener('click',()=>{
    setTimeout(()=>{a.remove();URL.revokeObjectURL(url);},3000);
   }
   $('importPreview').textContent=roster.length
-   ? `${roster.length}人分の名簿入りCSVを出力しました。D列以降の日付を入力し、欠席・公欠・出席停止の生徒だけ変更してください。`
+   ? `${roster.length}人分の名簿入りCSVを出力しました。D列以降に日付を入力してください。時限を指定する場合は「2026/11/19 1時間目」の形式にします。日付だけなら従来形式として取り込みます。`
    : `空のCSVテンプレート（50行）を出力しました。現在、この授業の名簿はアプリに登録されていません。先にホーム画面の「名簿・バックアップ」から名簿を登録し、CSVにクラス・番号・氏名を入力してください。`;
  }catch(err){
   $('importPreview').textContent='CSVを出力できませんでした。ブラウザのダウンロード許可を確認してください。詳細：'+err.message;
@@ -384,11 +520,10 @@ function previewHistory(fileText){
  if(headerIndex<0)throw Error('「クラス・番号・氏名」の見出し行が見つかりません。テンプレートの「出欠入力」シートをCSV UTF-8で保存してください。');
  const header=rows[headerIndex],dataRows=rows.slice(headerIndex+1),courseObj=course($('importCourse').value);
  if(header.length<4)throw Error('D列以降に授業日を入力してください。');
- const dates=header.slice(3).map(normalizeDate);
- const dateCols=dates.map((d,i)=>({date:d,index:i+3})).filter(x=>x.date);
+ const dateCols=header.slice(3).map((v,i)=>{const raw=String(v||'').trim(),m=raw.match(/^(.*?)(?:\s*(?:第)?([1-7])時間目)$/),date=normalizeDate(m?m[1]:raw);return date?{date,index:i+3,period:m?Number(m[2]):null}:null;}).filter(Boolean);
  if(!dateCols.length)throw Error('D列以降に授業日が見つかりません。Excelで日付を入力してからCSV保存してください。');
- const duplicateDates=dateCols.map(x=>x.date).filter((d,i,a)=>a.indexOf(d)!==i);
- if(duplicateDates.length)throw Error('同じ授業日が複数列にあります：'+[...new Set(duplicateDates)].join('、'));
+ const duplicateDates=dateCols.map(x=>`${x.date}|${x.period??'legacy'}`).filter((d,i,a)=>a.indexOf(d)!==i);
+ if(duplicateDates.length)throw Error('同じ授業日・時限が複数列にあります：'+[...new Set(duplicateDates)].join('、'));
  const studentMap=new Map(students.map(s=>[`${s.cls}|${String(s.no).trim()}`,s]));
  const allowed=new Set(courseObj.classes);
  let errors=[],items=[],matched=0,seenStudents=new Set();
@@ -406,21 +541,22 @@ function previewHistory(fileText){
    const raw=line[dc.index]??'';
    const status=statusFromCell(raw);
    if(status===null){errors.push(`${headerIndex+r+2}行目・${dc.date}：出欠状況「${raw}」を判定できません`);continue;}
-   items.push({student:st,date:dc.date,status});
+   if(dc.period&&dc.period>maxPeriodForDate(dc.date)){errors.push(`${headerIndex+r+2}行目・${dc.date}：この曜日に${dc.period}時間目は設定できません`);continue;}
+   items.push({student:st,date:dc.date,period:dc.period,status});
   }
  }
  if(!matched)errors.push('名簿と一致する生徒がありません。クラス・番号を確認してください。');
  const expected=students.filter(s=>allowed.has(s.cls));
  const missing=expected.filter(s=>!seenStudents.has(s.id));
  if(missing.length)errors.push(`名簿の生徒がCSVに${missing.length}人分ありません。例：${missing.slice(0,5).map(s=>s.cls+' '+s.no+'番').join('、')}。全員分の行を含めてください。`);
- const existing=new Set(records.flatMap(rec=>rec.statuses.map(s=>`${rec.courseId}|${rec.date}|${s.id}`)));
- const duplicates=items.filter(x=>existing.has(`${courseObj.id}|${x.date}|${x.student.id}`));
- if(duplicates.length)errors.push(`既存記録と重複する組み合わせが${duplicates.length}件あります。重複を解消してから取り込んでください。`);
+ const existing=new Set(latestRecordsBySlot(records).flatMap(rec=>rec.statuses.map(s=>`${rec.courseId}|${rec.date}|${slotPeriod(rec)??'legacy'}|${s.id}`)));
+ const duplicates=items.filter(x=>existing.has(`${courseObj.id}|${x.date}|${x.period??'legacy'}|${x.student.id}`));
+ if(duplicates.length)errors.push(`既存記録と重複する授業日・時限・生徒の組み合わせが${duplicates.length}件あります。重複を解消してから取り込んでください。`);
  if(errors.length)throw Error(errors.slice(0,12).join('\n')+(errors.length>12?`\nほか${errors.length-12}件`:'')); 
- pendingHistory={course:courseObj,items,dates:dateCols.map(x=>x.date)};
+ pendingHistory={course:courseObj,items,dates:dateCols.map(x=>x.date),slots:dateCols.map(x=>`${x.date}${x.period?' '+x.period+'時間目':''}`)};
  $('importRange').value=`${pendingHistory.dates[0]} ～ ${pendingHistory.dates[pendingHistory.dates.length-1]}`;
  $('importCount').value=`${items.length}件`;
- $('importPreview').innerHTML=`<strong>取り込み確認</strong><br>対象生徒：${matched}人<br>授業日：${dateCols.length}日<br>記録件数：${items.length}件<br><br>※授業日が設定された列は、空欄も「出席」として取り込みます。欠席・公欠・出席停止だけを変更してください。`;
+ $('importPreview').innerHTML=`<strong>取り込み確認</strong><br>対象生徒：${matched}人<br>授業日・時限：${dateCols.length}枠<br>記録件数：${items.length}件<br><br>※授業日が設定された列は、空欄も「出席」として取り込みます。欠席・公欠・出席停止だけを変更してください。`;
  $('confirmImport').disabled=false;
 }
 $('historyCsv').onchange=async e=>{
@@ -432,19 +568,20 @@ $('clearImport').onclick=()=>{pendingHistory=null;$('historyCsv').value='';$('im
 $('confirmImport').onclick=()=>{
  if(!pendingHistory)return;
  const c=pendingHistory.course;
- const byDate=new Map();
- for(const x of pendingHistory.items){if(!byDate.has(x.date))byDate.set(x.date,[]);byDate.get(x.date).push({id:x.student.id,cls:x.student.cls,no:x.student.no,name:x.student.name,gender:x.student.gender,status:x.status});}
- for(const [date,statuses] of byDate){
-  const all=c.classes.flatMap(cls=>students.filter(s=>s.cls===cls));
-  const map=new Map(statuses.map(s=>[s.id,s]));
-  records.push({id:'past_'+Date.now()+'_'+date.replace(/-/g,''),courseId:c.id,label:c.label,subject:c.subject,units:c.units,date,statuses:all.map(s=>map.get(s.id)||({id:s.id,cls:s.cls,no:s.no,name:s.name,gender:s.gender,status:'出席'})),source:'過去入力'});
+ const bySlot=new Map();
+ for(const x of pendingHistory.items){const key=`${x.date}|${x.period??'legacy'}`;if(!bySlot.has(key))bySlot.set(key,{date:x.date,period:x.period,statuses:[]});bySlot.get(key).statuses.push({id:x.student.id,cls:x.student.cls,no:x.student.no,name:x.student.name,gender:x.student.gender,status:x.status});}
+ for(const slot of bySlot.values()){
+  const all=courseStudents(c),map=new Map(slot.statuses.map(s=>[s.id,s]));
+  const rec={id:'past_'+Date.now()+'_'+slot.date.replace(/-/g,'')+'_'+(slot.period??'legacy'),courseId:c.id,label:c.label,subject:c.subject,units:c.units,date:slot.date,statuses:all.map(s=>map.get(s.id)||({id:s.id,cls:s.cls,no:s.no,name:s.name,gender:s.gender,status:'出席'})),source:'過去入力'};
+  if(slot.period!==null)rec.period=slot.period;
+  records.push(rec);
  }
  write('v3records',records);
- alert(`${byDate.size}日分の過去データを登録しました。`);
+ alert(`${bySlot.size}枠分の過去データを登録しました。`);
  $('clearImport').click();renderCautions();show('home');
 };
 
-fillCourses();renderFormation();renderCautions();
+fillCourses();updatePeriodOptions();loadRegistrationStates();renderFormation();renderCourseCalendar();renderCautions();
 
 // 学校共通パスワード：各端末で初回設定し、非抽出CryptoKeyをIndexedDBに保存
 const APP_BACKUP_ID = 'attendance-app-v3';
@@ -708,7 +845,7 @@ $('backupSave').onclick=async()=>{
     const key=await getStoredKey();
     if(!key)throw new Error('先に「初回設定・再設定」から共通パスワードを設定してください。');
     const payload={
-      app:APP_BACKUP_ID,formatVersion:1,appVersion:'3.8.3',
+      app:APP_BACKUP_ID,formatVersion:1,appVersion:'3.9.1',
       exportedAt:new Date().toISOString(),deviceNumber:currentDeviceNumber(),
       data:{
         students:JSON.parse(localStorage.getItem('v3students')||'[]'),
