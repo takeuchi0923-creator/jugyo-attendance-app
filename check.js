@@ -1,0 +1,841 @@
+
+const $=id=>document.getElementById(id),read=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},write=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+const COURSES=[
+{id:'1AB',label:'体育 1AB',subject:'体育',mode:'formation',units:2,classes:['1A','1B']},
+{id:'2CD',label:'体育 2CD',subject:'体育',mode:'formation',units:3,classes:['2C','2D']},
+{id:'2EF',label:'体育 2EF',subject:'体育',mode:'formation',units:2,classes:['2E','2F']},
+{id:'1D-H',label:'保健 1D',subject:'保健',mode:'list',units:1,classes:['1D']},
+{id:'1E-H',label:'保健 1E',subject:'保健',mode:'list',units:1,classes:['1E']},
+{id:'1F-H',label:'保健 1F',subject:'保健',mode:'list',units:1,classes:['1F']},
+{id:'3-LPE',label:'選択体育 3年文系',subject:'選択体育',mode:'list',units:2,classes:[]}
+];
+const DEFAULT_ROSTER=[];
+let students=read('v3students',null);
+if(!Array.isArray(students)){students=DEFAULT_ROSTER;write('v3students',students);}
+let records=read('v3records',[]),threshold=read('v3threshold',5),states={};
+const d=new Date(),today=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+$('today').textContent=d.toLocaleDateString('ja-JP',{month:'long',day:'numeric',weekday:'short'});$('date').value=today;
+let calendarMonth=new Date(d.getFullYear(),d.getMonth(),1);
+const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));const target=$(id);if(!target){alert('画面の読み込みに失敗しました。ページを再読み込みしてください。');return;}target.classList.add('active');if(id==='home')renderCautions()}
+$('goReg').addEventListener('click',()=>{if($('date').value===today)applyDefaultPeriodForDate();show('reg');refreshRegistration();});
+$('goBulkChange').addEventListener('click',openBulkChange);
+function openSummary(){prepareSummaryClasses();show('summary');renderSummary()}
+$('goSummaryHome').addEventListener('click',openSummary);$('goSettings').addEventListener('click',()=>show('settings'));$('settingsHistory').addEventListener('click',()=>show('import'));$('settingsRoster').addEventListener('click',()=>show('rosterSettings'));document.querySelectorAll('[data-home]').forEach(b=>b.onclick=()=>show('home'));document.querySelectorAll('[data-settings]').forEach(b=>b.onclick=()=>show('settings'));
+function course(id){return COURSES.find(c=>c.id===id)||COURSES[0]}
+function fillCourses(){['course','importCourse'].forEach(id=>$(id).innerHTML=COURSES.map(c=>`<option value="${c.id}">${esc(c.label)}</option>`).join(''))}
+function courseStudents(c){
+ const subjectOf=s=>s.subject||(s.cls&&c.subject==='体育'?'体育':'');
+ if(c.id==='3-LPE')return students.filter(s=>s.enrollmentStatus!=='ended'&&subjectOf(s)==='選択体育');
+ return c.classes.flatMap(cls=>students.filter(s=>s.enrollmentStatus!=='ended'&&s.cls===cls&&subjectOf(s)===c.subject));
+}
+function members(c){return c.classes.map(cls=>({cls,list:students.filter(s=>s.enrollmentStatus!=='ended'&&s.cls===cls&&(s.subject||'体育')==='体育')})).filter(g=>g.list.length)}
+function status(s){return states[s.id]||'出席'}
+function slotPeriod(r){return Number.isInteger(Number(r.period))&&Number(r.period)>=1?Number(r.period):null;}
+function slotKey(r){return `${r.courseId}|${r.date}|${slotPeriod(r)??'legacy'}`;}
+function latestRecordsBySlot(list){const m=new Map();list.forEach(r=>m.set(slotKey(r),r));return [...m.values()];}
+function recordsForCourseDate(courseId,date){return latestRecordsBySlot(records.filter(r=>r.courseId===courseId&&r.date===date));}
+function findSlotRecord(courseId,date,period){return latestRecordsBySlot(records.filter(r=>r.courseId===courseId&&r.date===date)).find(r=>(slotPeriod(r)??'legacy')===(period??'legacy'))||null;}
+function maxPeriodForDate(date){const dt=new Date(date+'T12:00:00');return dt.getDay()===4?7:6;}
+function updatePeriodOptions(preferred=null){const sel=$('period');if(!sel)return;const date=$('date').value||today,max=maxPeriodForDate(date),current=preferred??(Number(sel.value)||1);sel.innerHTML=Array.from({length:max},(_,i)=>`<option value=\"${i+1}\">${i+1}時間目</option>`).join('');sel.value=String(Math.min(current,max));}
+function periodForCurrentTime(now=new Date()){
+ const day=now.getDay(),mins=now.getHours()*60+now.getMinutes();
+ if(day===0||day===6)return 1;
+ const thursday=day===4;
+ const starts=thursday?[8*60+40,9*60+40,10*60+40,11*60+40,13*60+15,14*60+15,15*60+15]:[8*60+50,9*60+50,10*60+50,11*60+50,13*60+25,14*60+25];
+ let result=1;
+ starts.forEach((start,i)=>{if(mins>=start+25)result=i+2;});
+ return Math.min(result,starts.length);
+}
+function applyDefaultPeriodForDate(){
+ const date=$('date').value||today;
+ if(date===today){const p=periodForCurrentTime();updatePeriodOptions(p);$('scheduleHint').textContent=`現在時刻 ${new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})} に合わせて ${p}時間目を初期選択しています。手動で時限を変更できます。`;}
+ else {updatePeriodOptions(1);$('scheduleHint').textContent='過去・未来の日付を選択中です。時限を手動で選択してください。';}
+}
+function loadRegistrationStates(){const rec=findSlotRecord($('course').value,$('date').value,Number($('period').value)||1);states={};if(rec)rec.statuses.forEach(x=>states[x.id]=x.status);}
+function renderCourseCalendar(){
+ const host=$('courseCalendar');if(!host)return;const cId=$('course').value,year=calendarMonth.getFullYear(),month=calendarMonth.getMonth();
+ $('calendarMonth').textContent=`${year}年${month+1}月`;const first=new Date(year,month,1),start=first.getDay(),days=new Date(year,month+1,0).getDate();
+ const headers=['日','月','火','水','木','金','土'];let html=headers.map(x=>`<div class="calendar-weekday">${x}</div>`).join('');
+ for(let i=0;i<start;i++)html+='<div class="calendar-day empty"></div>';
+ for(let day=1;day<=days;day++){const date=`${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`,count=recordsForCourseDate(cId,date).length,mark=count>=2?'◎':count===1?'○':'',cls=[date===$('date').value?'selected':'',date===today?'today':''].filter(Boolean).join(' ');html+=`<button type="button" class="calendar-day ${cls}" data-date="${date}"><span>${day}</span><span class="mark">${mark}</span></button>`;}
+ host.innerHTML=html;host.querySelectorAll('button[data-date]').forEach(b=>b.onclick=()=>{$('date').value=b.dataset.date;updatePeriodOptions();loadRegistrationStates();renderFormation();renderCourseCalendar();});
+}
+function refreshRegistration(){updatePeriodOptions();loadRegistrationStates();renderFormation();renderCourseCalendar();}
+function updateEditPeriodOptions(){const date=$('editDate').value||today,sel=$('editPeriod');const old=sel.value;const max=maxPeriodForDate(date);const opts=[];if(records.some(r=>r.courseId===$('editCourse').value&&r.date===date&&slotPeriod(r)===null))opts.push('<option value="legacy">時限未設定（過去記録）</option>');for(let i=1;i<=max;i++)opts.push(`<option value="${i}">${i}時間目</option>`);sel.innerHTML=opts.join('');if([...sel.options].some(o=>o.value===old))sel.value=old;else sel.value=opts.length?sel.options[0].value:'1';}
+function renderEditRows(){const c=course($('editCourse').value),date=$('editDate').value,raw=$('editPeriod').value,period=raw==='legacy'?null:Number(raw),rec=findSlotRecord(c.id,date,period);const host=$('editRows'),info=$('editRecordInfo'),save=$('saveIndividualEdit');if(!rec){info.textContent='この授業・日付・時限の保存済み記録はありません。';host.innerHTML='';save.disabled=true;return;}const savedStatuses=rec.statuses||[];info.textContent=`${c.label} ／ ${date} ／ ${period===null?'時限未設定（過去記録）':period+'時間目'} ／ ${savedStatuses.length}人分。変更した生徒だけを保存します。`;host.innerHTML=savedStatuses.map(item=>{const st=students.find(x=>x.id===item.id)||item,value=item.status||'出席';return `<div class="edit-row" data-student="${esc(item.id)}"><div><div class="edit-name">${esc(st.cls)} ${esc(st.no)}番 ${esc(st.name)}</div><div class="edit-meta">現在：${esc(value)}</div></div><select aria-label="${esc(st.name)}の出欠状況"><option ${value==='出席'?'selected':''}>出席</option><option ${value==='欠席'?'selected':''}>欠席</option><option ${value==='公欠'?'selected':''}>公欠</option><option ${value==='出席停止'?'selected':''}>出席停止</option></select></div>`;}).join('');save.disabled=savedStatuses.length===0;}
+function updateMoveSourcePeriodOptions(){const date=$('moveSourceDate').value||today,sel=$('moveSourcePeriod'),old=sel.value,max=maxPeriodForDate(date),opts=[];if(records.some(r=>r.courseId===$('moveCourse').value&&r.date===date&&slotPeriod(r)===null))opts.push('<option value="legacy">時限未設定（過去記録）</option>');for(let i=1;i<=max;i++)opts.push(`<option value="${i}">${i}時間目</option>`);sel.innerHTML=opts.join('');if([...sel.options].some(o=>o.value===old))sel.value=old;else sel.value=opts.length?opts[0].value:'1';}
+function updateMovePeriodOptions(preferred=null){const date=$('moveDate').value||today,sel=$('movePeriod');if(!sel)return;const old=preferred??(Number(sel.value)||1),max=maxPeriodForDate(date);sel.innerHTML=Array.from({length:max},(_,i)=>`<option value="${i+1}">${i+1}時間目</option>`).join('');sel.value=String(Math.min(old,max));}
+function refreshMovePanel(){const c=course($('moveCourse').value),date=$('moveSourceDate').value,raw=$('moveSourcePeriod').value,period=raw==='legacy'?null:Number(raw),rec=findSlotRecord(c.id,date,period),msg=$('moveMessage'),btn=$('moveLesson');if(!rec){msg.textContent='この授業・日付・時限の保存済み記録はありません。移動元を選び直してください。';btn.disabled=true;return;}msg.textContent=`変更元の記録：${c.label} ／ ${date} ／ ${period===null?'時限未設定（過去記録）':period+'時間目'} ／ ${rec.statuses?.length||0}人分`;btn.disabled=false;if(!$('moveDate').value)$('moveDate').value=date;updateMovePeriodOptions(period||1);}
+function moveSavedLesson(){const c=course($('moveCourse').value),sourceDate=$('moveSourceDate').value,raw=$('moveSourcePeriod').value,sourcePeriod=raw==='legacy'?null:Number(raw),source=findSlotRecord(c.id,sourceDate,sourcePeriod);if(!source)return alert('移動元の保存済み記録が見つかりません。');const targetDate=$('moveDate').value,targetPeriod=Number($('movePeriod').value);if(!targetDate||!targetPeriod)return alert('変更先の日付と時限を選択してください。');if(targetPeriod>maxPeriodForDate(targetDate))return alert('変更先の曜日に存在しない時限です。');if(source.date===targetDate&&sourcePeriod===targetPeriod)return alert('変更元と変更先が同じです。');const destination=records.filter(r=>r.courseId===c.id&&r.date===targetDate&&slotPeriod(r)===targetPeriod&&r.id!==source.id);if(destination.length){const latestDestination=latestRecordsBySlot(destination).slice(-1)[0];const count=latestDestination?.statuses?.length||0;const ok=confirm(`変更先には既に出欠記録があります。\n\n${c.label}\n${targetDate}・${targetPeriod}時間目\n既存記録：${count}人分\n移動元記録：${source.statuses?.length||0}人分\n\n【OK】既存記録を上書きして移動する\n【キャンセル】何も変更しない`);if(!ok)return;records=records.filter(r=>!(r.courseId===c.id&&r.date===targetDate&&slotPeriod(r)===targetPeriod&&r.id!==source.id));}
+const idx=records.findIndex(r=>r.id===source.id);if(idx<0)return alert('移動元の記録が見つからなくなりました。変更は行っていません。');records[idx]={...records[idx],date:targetDate,period:targetPeriod};write('v3records',records);renderCourseCalendar();renderCautions();$('moveSourceDate').value=targetDate;updateMoveSourcePeriodOptions();$('moveSourcePeriod').value=String(targetPeriod);$('moveDate').value=targetDate;updateMovePeriodOptions(targetPeriod);refreshMovePanel();alert(`${c.label}の記録を\n${targetDate}・${targetPeriod}時間目\nへ移動しました。出欠状況は維持されています。`);}
+function openIndividualEdit(){const cId=$('course').value,date=$('date').value,period=$('period').value;$('editCourse').value=cId;$('editDate').value=date;updateEditPeriodOptions();$('editPeriod').value=period;renderEditRows();$('moveCourse').value=cId;$('moveSourceDate').value=date;updateMoveSourcePeriodOptions();$('moveSourcePeriod').value=period;refreshMovePanel();$('moveDate').value=date;updateMovePeriodOptions(Number(period)||1);show('editRecord');}
+function saveIndividualChanges(){const c=course($('editCourse').value),date=$('editDate').value,raw=$('editPeriod').value,period=raw==='legacy'?null:Number(raw);const rec=findSlotRecord(c.id,date,period);if(!rec)return alert('修正対象の記録が見つかりません。');let changed=0;document.querySelectorAll('#editRows .edit-row').forEach(row=>{const id=row.dataset.student,value=row.querySelector('select').value,item=rec.statuses.find(x=>x.id===id);if(item&&item.status!==value){item.status=value;changed++;}});if(!changed){alert('変更された生徒はいません。');return;}write('v3records',records);renderCautions();renderCourseCalendar();renderEditRows();alert(`${changed}人分の出欠を修正しました。ほかの生徒の記録は変更していません。`);}
+function clearBulkPreview(message='条件を変更しました。あらためて「変更対象を確認」してください。'){
+ $('bulkApply').disabled=true;$('bulkPreviewRows').innerHTML='';$('bulkPreviewResult').textContent=message;bulkChangePlan=null;
+}
+let bulkChangePlan=null;
+function fillBulkClasses(){
+ const classes=[...new Set(students.filter(st=>st.enrollmentStatus!=='ended').map(st=>String(st.cls||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ja'));
+ $('bulkClass').innerHTML=classes.map(cls=>`<option value="${esc(cls)}">${esc(cls)}</option>`).join('');
+ if(!classes.length)$('bulkClass').innerHTML='<option value="">名簿がありません</option>';
+ fillBulkStudents();
+}
+function fillBulkStudents(){
+ const cls=$('bulkClass').value;
+ const roster=students.filter(st=>st.enrollmentStatus!=='ended'&&String(st.cls)===cls).sort((a,b)=>(Number(a.no)||9999)-(Number(b.no)||9999)||String(a.name).localeCompare(String(b.name),'ja'));
+ $('bulkStudent').innerHTML=roster.map(st=>`<option value="${esc(st.id)}">${esc(st.no)}番 ${esc(st.name)}</option>`).join('');
+ if(!roster.length)$('bulkStudent').innerHTML='<option value="">対象生徒がいません</option>';
+}
+function fillBulkPeriodOptions(which){
+ const date=$(`bulk${which}Date`).value||today,sel=$(`bulk${which}Period`),old=Number(sel.value)|| (which==='Start'?1:maxPeriodForDate(date)),max=maxPeriodForDate(date);
+ sel.innerHTML=Array.from({length:max},(_,i)=>`<option value="${i+1}">${i+1}時間目</option>`).join('');
+ sel.value=String(Math.min(old,max));
+}
+function openBulkChange(){
+ fillBulkClasses();
+ $('bulkStartDate').value=today;$('bulkEndDate').value=today;
+ fillBulkPeriodOptions('Start');fillBulkPeriodOptions('End');
+ $('bulkStartPeriod').value='1';$('bulkEndPeriod').value=String(maxPeriodForDate(today));
+ $('bulkStatus').value='公欠';clearBulkPreview('クラス・生徒・期間を指定して「変更対象を確認」を押してください。');
+ $('bulkChangeMessage').textContent='';show('bulkChange');
+}
+function buildBulkChangePlan(){
+ const cls=$('bulkClass').value,studentId=$('bulkStudent').value,startDate=$('bulkStartDate').value,endDate=$('bulkEndDate').value;
+ const startPeriod=Number($('bulkStartPeriod').value),endPeriod=Number($('bulkEndPeriod').value),newStatus=$('bulkStatus').value;
+ const student=students.find(st=>String(st.id)===String(studentId)&&String(st.cls)===String(cls)&&st.enrollmentStatus!=='ended');
+ if(!student)throw new Error('対象生徒を選択してください。');
+ if(!startDate||!endDate)throw new Error('開始日と終了日を選択してください。');
+ if(startDate>endDate)throw new Error('終了日は開始日以降にしてください。');
+ if(!startPeriod||startPeriod>maxPeriodForDate(startDate))throw new Error('開始時限がその曜日の時間割の範囲外です。');
+ if(!endPeriod||endPeriod>maxPeriodForDate(endDate))throw new Error('終了時限がその曜日の時間割の範囲外です。');
+ if(startDate===endDate&&startPeriod>endPeriod)throw new Error('同じ日の場合、終了時限は開始時限以降にしてください。');
+ const latest=latestRecordsBySlot(records),matches=[],legacy=[];
+ latest.forEach(rec=>{
+  if(!rec.date||rec.date<startDate||rec.date>endDate)return;
+  const item=(rec.statuses||[]).find(x=>String(x.id)===String(student.id));
+  if(!item)return;
+  const period=slotPeriod(rec);
+  if(period===null){legacy.push(rec);return;}
+  if(rec.date===startDate&&period<startPeriod)return;
+  if(rec.date===endDate&&period>endPeriod)return;
+  matches.push({rec,item,oldStatus:item.status||'出席'});
+ });
+ const changed=matches.filter(x=>x.oldStatus!==newStatus).length;
+ return {student,cls,startDate,endDate,startPeriod,endPeriod,newStatus,matches,legacy,changed,unchanged:matches.length-changed};
+}
+function renderBulkPreview(plan){
+ const s=plan.student;
+ $('bulkPreviewResult').innerHTML=`<strong>${esc(s.cls)} ${esc(s.no)}番 ${esc(s.name)}</strong><br>${esc(plan.startDate)} ${plan.startPeriod}時間目 ～ ${esc(plan.endDate)} ${plan.endPeriod}時間目<br><strong>対象記録：${plan.matches.length}コマ ／ 実際に変更：${plan.changed}コマ</strong><br>すでに変更後と同じ：${plan.unchanged}コマ ／ 時限未設定の旧記録（除外）：${plan.legacy.length}件`;
+ if(!plan.matches.length){$('bulkPreviewRows').innerHTML='<div class="empty">指定期間内に、この生徒の時限付き出欠記録はありません。</div>';return;}
+ const rows=plan.matches.slice().sort((a,b)=>a.rec.date.localeCompare(b.rec.date)||slotPeriod(a.rec)-slotPeriod(b.rec)||String(a.rec.label||'').localeCompare(String(b.rec.label||''),'ja'));
+ $('bulkPreviewRows').innerHTML='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:440px"><thead><tr style="background:#edf3ef"><th style="padding:8px;text-align:left">日付・時限</th><th style="padding:8px;text-align:left">授業</th><th style="padding:8px">現在</th><th style="padding:8px">変更後</th></tr></thead><tbody>'+rows.map(x=>`<tr><td style="padding:8px;border-bottom:1px solid var(--line)">${esc(x.rec.date)}・${slotPeriod(x.rec)}時間目</td><td style="padding:8px;border-bottom:1px solid var(--line)">${esc(x.rec.label||course(x.rec.courseId).label)}</td><td style="padding:8px;text-align:center;border-bottom:1px solid var(--line)">${esc(x.oldStatus)}</td><td style="padding:8px;text-align:center;border-bottom:1px solid var(--line)">${esc(plan.newStatus)}</td></tr>`).join('')+'</tbody></table></div>';
+}
+function previewBulkChange(){
+ try{bulkChangePlan=buildBulkChangePlan();renderBulkPreview(bulkChangePlan);$('bulkApply').disabled=bulkChangePlan.changed===0;if(bulkChangePlan.changed===0)$('bulkChangeMessage').textContent='変更が必要な記録はありません。';else $('bulkChangeMessage').textContent='一覧を確認し、内容に間違いがなければ一括変更を実行してください。';}
+ catch(e){clearBulkPreview(e.message);$('bulkChangeMessage').textContent='';}
+}
+function applyBulkChange(){
+ let plan;try{plan=buildBulkChangePlan();}catch(e){clearBulkPreview(e.message);return;}
+ if(!plan.changed){alert('変更が必要な記録はありません。');return;}
+ if(!confirm(`${plan.student.cls} ${plan.student.no}番 ${plan.student.name} さん\n${plan.startDate} ${plan.startPeriod}時間目 ～ ${plan.endDate} ${plan.endPeriod}時間目\n対象 ${plan.matches.length}コマのうち ${plan.changed}コマを「${plan.newStatus}」に変更します。\n\n対象一覧を確認しましたか？ 実行しますか？`))return;
+ let changed=0;
+ plan.matches.forEach(x=>{if(x.item.status!==plan.newStatus){x.item.status=plan.newStatus;changed++;}});
+ write('v3records',records);
+ renderCautions();renderCourseCalendar();
+ if($('summary').classList.contains('active'))renderSummary();
+ previewBulkChange();
+ $('bulkChangeMessage').textContent=`変更完了：${plan.student.name} さんの ${changed}コマを「${plan.newStatus}」に変更しました。ほかの生徒の記録や、指定期間外の記録は変更していません。`;
+ alert(`${changed}コマの出欠を変更しました。`);
+}
+$('bulkClass').addEventListener('change',()=>{fillBulkStudents();clearBulkPreview();});
+['bulkStudent','bulkStatus','bulkStartDate','bulkEndDate','bulkStartPeriod','bulkEndPeriod'].forEach(id=>$(id).addEventListener('change',()=>clearBulkPreview()));
+$('bulkStartDate').addEventListener('change',()=>{fillBulkPeriodOptions('Start');clearBulkPreview();});
+$('bulkEndDate').addEventListener('change',()=>{fillBulkPeriodOptions('End');clearBulkPreview();});
+$('bulkPreview').addEventListener('click',previewBulkChange);
+$('bulkApply').addEventListener('click',applyBulkChange);
+function updateRegSummary(){
+ const all=courseStudents(course($('course').value));
+ const counts={'出席':0,'欠席':0,'公欠':0,'出席停止':0};
+ all.forEach(s=>counts[states[s.id]||'出席']++);
+ $('regPresent').textContent=counts['出席'];$('regAbsent').textContent=counts['欠席'];
+ $('regOfficial').textContent=counts['公欠'];$('regSusp').textContent=counts['出席停止'];
+}
+function renderFormation(){
+ const c=course($('course').value);$('units').value=c.units+'単位';
+ $('courseInfo').textContent=c.id==='3-LPE'?'対象：教科「選択体育」の登録生徒':('対象クラス：'+c.classes.join('・'));
+ const all=courseStudents(c);$('total').textContent=all.length+'人';
+ if(!all.length){$('formation').innerHTML='<div class="empty">対象名簿がありません。名簿管理から登録してください。</div>';updateRegSummary();return}
+ if(c.mode==='list'){
+  const classNames=[...new Set(all.map(st=>st.cls))].sort((a,b)=>String(a).localeCompare(String(b),'ja'));
+  let listHtml='<div class="nonpe-groups">';
+  classNames.forEach(cls=>{
+   const sorted=all.filter(st=>st.cls===cls).sort((a,b)=>(Number(a.no)||9999)-(Number(b.no)||9999));
+   listHtml+=`<div class="nonpe-class"><div class="nonpe-class-title">${esc(cls)}</div><div class="nonpe-scroll"><div class="roster-tap-list">`;
+   sorted.forEach((st,i)=>{
+    const state=states[st.id]||'出席',cl=state==='欠席'?'abs':state==='公欠'?'pub':state==='出席停止'?'stop':'';
+    const col=Math.floor(i/10)+1,row=(i%10)+1;
+    listHtml+=`<button class="roster-tap ${cl}" data-id="${esc(st.id)}" style="grid-column:${col};grid-row:${row}"><span class="roster-meta">${esc(st.no)}番</span><strong>${esc(st.name)}</strong><span class="roster-status">${state}</span></button>`;
+   });
+   listHtml+='</div></div></div>';
+  });
+  $('formation').innerHTML=listHtml+'</div>';
+  $('formation').querySelectorAll('.roster-tap').forEach(btn=>btn.onclick=()=>{
+   const cycle=['出席','欠席','公欠','出席停止'];states[btn.dataset.id]=cycle[(cycle.indexOf(states[btn.dataset.id]||'出席')+1)%cycle.length];renderFormation();
+  });
+  updateRegSummary();return;
+ }
+ let html='';
+ for(const g of members(c)){
+  html+=`<div class="classgroup"><div class="group-title">${esc(g.cls)}</div>`;
+  for(const gender of ['男','女','未設定']){
+   let list=g.list.filter(st=>st.gender===gender).sort((x,y)=>(Number(x.no)||9999)-(Number(y.no)||9999));
+   if(!list.length)continue;
+   html+=`<div class="gender-section"><div class="gender-title">${gender==='未設定'?'性別未設定':gender+'子'}（${list.length}人）</div><div class="seat-scroller"><div class="seat-grid">`;
+   list.forEach((st,i)=>{
+    let state=states[st.id]||'出席',cl=state==='欠席'?'abs':state==='公欠'?'pub':state==='出席停止'?'stop':'';
+    let col=Math.floor(i/5)+1,row=5-(i%5);
+    html+=`<button class="seat ${cl}" data-id="${esc(st.id)}" style="grid-column:${col};grid-row:${row}"><span class="no">${esc(st.no)}番</span><span class="nm">${esc(st.name)}</span><span class="st">${state}</span></button>`;
+   });
+   html+=`</div></div><div class="teacher-side">教師側</div></div>`;
+  }html+='</div>';
+ }
+ $('formation').innerHTML=html;
+ $('formation').querySelectorAll('.seat').forEach(btn=>btn.onclick=()=>{
+  const cycle=['出席','欠席','公欠','出席停止'];states[btn.dataset.id]=cycle[(cycle.indexOf(states[btn.dataset.id]||'出席')+1)%cycle.length];renderFormation();
+ });
+ updateRegSummary();
+}
+$('course').onchange=()=>{refreshRegistration()};$('date').onchange=()=>{applyDefaultPeriodForDate();loadRegistrationStates();renderFormation();calendarMonth=new Date(($('date').value||today)+'T12:00:00');calendarMonth.setDate(1);renderCourseCalendar()};$('period').onchange=()=>{loadRegistrationStates();renderFormation()};$('reset').onclick=()=>{states={};renderFormation()};$('openIndividualEdit').onclick=openIndividualEdit;$('calendarPrev').onclick=()=>{calendarMonth.setMonth(calendarMonth.getMonth()-1);renderCourseCalendar()};$('calendarNext').onclick=()=>{calendarMonth.setMonth(calendarMonth.getMonth()+1);renderCourseCalendar()};
+$('save').onclick=()=>{let c=course($('course').value),all=courseStudents(c),date=$('date').value,period=Number($('period').value);if(!all.length)return alert('対象クラスの名簿を読み込んでください。');if(!date||!period)return alert('授業日と時限を選択してください。');let existing=findSlotRecord(c.id,date,period);let rec=existing||{id:'r'+Date.now(),courseId:c.id,label:c.label,subject:c.subject,units:c.units,date,period,statuses:[]};rec.period=period;rec.statuses=all.map(s=>({id:s.id,cls:s.cls,no:s.no,name:s.name,gender:s.gender,status:status(s)}));if(existing){const idx=records.findIndex(r=>r.id===existing.id);if(idx>=0)records[idx]=rec;}else records.push(rec);write('v3records',records);renderCourseCalendar();alert(`${c.label}・${date}・${period}時間目の出欠を保存しました。`)};
+function clearCurrentLesson(){const c=course($('course').value),date=$('date').value,period=Number($('period').value);if(!date||!period)return alert('授業日と時限を確認してください。');const matching=records.filter(r=>r.courseId===c.id&&r.date===date&&slotPeriod(r)===period);if(!matching.length)return alert('この授業・日付・時限には保存済み記録がありません。');if(!confirm(`${c.label}\n${date}・${period}時間目\n\nこの授業枠の保存済み出欠記録を削除し、「授業なし」の状態に戻します。\n名簿や他の日・他の時限の記録は削除しません。\n\n本当に授業クリアしますか？`))return;records=records.filter(r=>!(r.courseId===c.id&&r.date===date&&slotPeriod(r)===period));write('v3records',records);states={};renderFormation();renderCourseCalendar();renderCautions();alert(`${c.label}・${date}・${period}時間目をクリアしました。`);}
+$('clearLesson').onclick=clearCurrentLesson;
+$('editCourse').innerHTML=COURSES.map(c=>`<option value="${c.id}">${esc(c.label)}</option>`).join('');$('moveCourse').innerHTML=COURSES.map(c=>`<option value="${c.id}">${esc(c.label)}</option>`).join('');$('editCourse').onchange=()=>{updateEditPeriodOptions();renderEditRows()};$('editDate').onchange=()=>{updateEditPeriodOptions();renderEditRows()};$('editPeriod').onchange=renderEditRows;$('moveCourse').onchange=()=>{updateMoveSourcePeriodOptions();refreshMovePanel()};$('moveSourceDate').onchange=()=>{updateMoveSourcePeriodOptions();refreshMovePanel()};$('moveSourcePeriod').onchange=refreshMovePanel;$('moveDate').onchange=()=>updateMovePeriodOptions();$('moveLesson').onclick=moveSavedLesson;$('saveIndividualEdit').onclick=saveIndividualChanges;$('cancelEdit').onclick=()=>show('reg');
+function subjectForRecord(r){
+ if(r.subject)return r.subject;
+ const c=COURSES.find(x=>x.id===r.courseId);
+ return c?c.subject:'体育';
+}
+function prepareSummaryClasses(){
+ const subject=$('summarySubject').value;
+ const classes=[...new Set(students.filter(s=>s.enrollmentStatus!=='ended'&&(s.subject||(s.cls?'体育':''))===subject).map(s=>s.cls))].sort((a,b)=>String(a).localeCompare(String(b),'ja'));
+ $('summaryClass').innerHTML=classes.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+ if(!classes.length)$('summaryClass').innerHTML='<option value="">名簿なし</option>';
+}
+function summaryRecords(subject,cls){
+ return latestRecordsBySlot(records.filter(r=>subjectForRecord(r)===subject)).filter(r=>r.statuses.some(st=>st.cls===cls));
+}
+function renderSummary(){
+ const subject=$('summarySubject').value,cls=$('summaryClass').value;
+ const roster=students.filter(s=>s.enrollmentStatus!=='ended'&&s.cls===cls&&(s.subject||(s.cls?'体育':''))===subject);
+ const genderMode=$('summaryGenderSort').classList.contains('on');
+ roster.sort((a,b)=>{if(genderMode){const g=['男','女','未設定'].indexOf(a.gender)-['男','女','未設定'].indexOf(b.gender);if(g)return g;}return (Number(a.no)||9999)-(Number(b.no)||9999);});
+ const recs=summaryRecords(subject,cls);
+ $('summaryCount').textContent=`${cls||'—'} ／ ${roster.length}人`;
+ $('studentDetail').style.display='none';
+ if(!roster.length){$('summaryRows').innerHTML='<tr><td colspan="6" class="empty">この教科・クラスの名簿がありません。</td></tr>';return;}
+ $('summaryRows').innerHTML=roster.map(st=>{
+  const stats={'欠席':[],'公欠':[],'出席停止':[]};let lesson=0;
+  recs.forEach(r=>{const recSt=r.statuses.find(x=>x.id===st.id);if(!recSt)return;lesson++;if(stats[recSt.status])stats[recSt.status].push(r.date);});
+  return `<tr data-student="${esc(st.id)}"><td>${esc(st.no)}</td><td style="text-align:left">${esc(st.name)}</td><td>${lesson}</td><td>${stats['欠席'].length}</td><td>${stats['公欠'].length}</td><td>${stats['出席停止'].length}</td></tr>`;
+ }).join('');
+ $('summaryRows').querySelectorAll('tr[data-student]').forEach(tr=>tr.onclick=()=>showStudentDetail(tr.dataset.student,subject,cls,recs));
+}
+function showStudentDetail(id,subject,cls,recs){
+ const st=students.find(x=>x.id===id);if(!st)return;
+ const dates={'欠席':[],'公欠':[],'出席停止':[]};
+ recs.forEach(r=>{const x=r.statuses.find(y=>y.id===id);if(x&&dates[x.status])dates[x.status].push(`${r.date}${slotPeriod(r)?'（'+slotPeriod(r)+'時間目）':'（時限未設定）'}`);});
+ const fmt=d=>{const m=d.match(/^(\d{4})-(\d{2})-(\d{2})(.*)$/);return m?`${Number(m[2])}/${Number(m[3])}${m[4]}`:d;};
+ $('detailName').textContent=`${st.cls} ${st.no}番 ${st.name} の出欠日`;
+ $('detailDates').innerHTML=Object.entries(dates).map(([label,ds])=>`<div class="detail-group"><strong>${label}（${ds.length}時数）</strong><div class="detail-dates">${ds.length?ds.sort().map(fmt).join('、'):'該当なし'}</div></div>`).join('');
+ $('studentDetail').style.display='block';
+ $('studentDetail').scrollIntoView({behavior:'smooth',block:'start'});
+}
+$('summarySubject').onchange=()=>{prepareSummaryClasses();renderSummary()};
+$('summaryClass').onchange=renderSummary;
+$('summaryNumberSort').onclick=()=>{$('summaryNumberSort').classList.add('on');$('summaryGenderSort').classList.remove('on');renderSummary()};
+$('summaryGenderSort').onclick=()=>{$('summaryGenderSort').classList.add('on');$('summaryNumberSort').classList.remove('on');renderSummary()};
+function exportSummaryCSV(){
+ const subject=$('summarySubject').value,cls=$('summaryClass').value;
+ if(!cls)return alert('クラスを選択してください。');
+ const roster=students.filter(s=>s.enrollmentStatus!=='ended'&&s.cls===cls&&(s.subject||(s.cls?'体育':''))===subject);
+ const genderMode=$('summaryGenderSort').classList.contains('on');
+ roster.sort((a,b)=>{if(genderMode){const g=['男','女','未設定'].indexOf(a.gender)-['男','女','未設定'].indexOf(b.gender);if(g)return g;}return (Number(a.no)||9999)-(Number(b.no)||9999);});
+ const recs=summaryRecords(subject,cls);
+ const rows=[['教科',subject],['クラス',cls],[],['番号','氏名','授業実施時数','欠席時数','公欠時数','出席停止時数']];
+ roster.forEach(st=>{
+  const counts={'欠席':0,'公欠':0,'出席停止':0};let lesson=0;
+  recs.forEach(r=>{const x=r.statuses.find(y=>y.id===st.id);if(!x)return;lesson++;if(counts[x.status]!==undefined)counts[x.status]++;});
+  rows.push([st.no,st.name,lesson,counts['欠席'],counts['公欠'],counts['出席停止']]);
+ });
+ const csv='\uFEFF'+rows.map(row=>row.map(csvEscape).join(',')).join('\r\n');
+ const a=document.createElement('a');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.href=url;a.download=`出欠集計_${subject}_${cls}.csv`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+$('summaryExport').onclick=exportSummaryCSV;
+const ABSENCE_LIMITS={
+ 1:{oneSeventh:5,oneSixth:6,oneFifth:7,oneThird:11},
+ 2:{oneSeventh:10,oneSixth:11,oneFifth:14,oneThird:23},
+ 3:{oneSeventh:15,oneSixth:17,oneFifth:21,oneThird:35},
+ 4:{oneSeventh:20,oneSixth:23,oneFifth:28,oneThird:46},
+ 5:{oneSeventh:25,oneSixth:29,oneFifth:35,oneThird:58},
+ 6:{oneSeventh:30,oneSixth:35,oneFifth:42,oneThird:70}
+};
+function courseRoster(c){
+ return students.filter(st=>c.subject==='選択体育'
+  ? (st.subject||'')==='選択体育'
+  : c.classes.includes(st.cls)&&(st.subject||'体育')===c.subject);
+}
+function renderCautions(){
+ const rows=[];
+ for(const c of COURSES){
+  const limits=ABSENCE_LIMITS[c.units];if(!limits)continue;
+  const courseRecords=latestRecordsBySlot(records.filter(r=>r.courseId===c.id));
+  for(const st of courseRoster(c)){
+   let count=0;
+   courseRecords.forEach(r=>{
+    const item=r.statuses.find(x=>x.id===st.id);
+    if(item&&item.status==='欠席')count++;
+   });
+   if(count<limits.oneSeventh)continue;
+   const level=count>=limits.oneFifth?'level-five':count>=limits.oneSixth?'level-six':'';
+   rows.push({student:st,course:c,count,remaining:Math.max(0,limits.oneThird-count),level});
+  }
+ }
+ rows.sort((a,b)=>a.course.label.localeCompare(b.course.label,'ja')||a.student.cls.localeCompare(b.student.cls,'ja')||(Number(a.student.no)||9999)-(Number(b.student.no)||9999));
+ $('cautions').innerHTML=rows.length
+ ? `<div class="caution-guide"><span>黒文字：1/7到達</span><span>赤文字：1/6到達</span><span class="yellow-guide">黄色背景・赤文字：1/5到達</span></div><div class="caution-head"><span>生徒名</span><span>授業名</span><span>欠時数<br><small>これまでの欠席回数</small></span><span>残欠席可能回数<br><small>1/3到達まで</small></span></div>`+rows.map(x=>`<div class="caution-row ${x.level}"><strong>${esc(x.student.name)}</strong><span class="caution-subject">${esc(x.course.label)}</span><span class="caution-count">${x.count}</span><span class="caution-count">${x.remaining}</span></div>`).join('')
+ : '<div class="hint">現在、1/7の基準に達した生徒はいません。名簿・記録が未登録の場合は、登録後に表示されます。</div>';
+}
+
+
+let pendingHistory=null;
+function csvEscape(v){const s=String(v??'');return /[",\r\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}
+$('downloadHistoryTemplate').addEventListener('click',()=>{
+ const c=course($('importCourse').value);
+ const roster=students.filter(s=>c.classes.includes(s.cls)).sort((a,b)=>c.classes.indexOf(a.cls)-c.classes.indexOf(b.cls)||(Number(a.no)||9999)-(Number(b.no)||9999));
+ const dateColumns=20;
+ const header=['クラス','番号','氏名',...Array(dateColumns).fill('')];
+ const body=roster.length
+  ? roster.map(s=>[s.cls,s.no,s.name,...Array(dateColumns).fill('出席')])
+  : Array.from({length:50},()=>['','','',...Array(dateColumns).fill('出席')]);
+ const csv='\uFEFF'+[header,...body].map(row=>row.map(csvEscape).join(',')).join('\r\n');
+ const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+ const filename=`過去出欠入力_${c.id}_CSVテンプレート.csv`;
+ try{
+  if(window.navigator.msSaveOrOpenBlob){window.navigator.msSaveOrOpenBlob(blob,filename);}
+  else{
+   const url=URL.createObjectURL(blob),a=document.createElement('a');
+   a.href=url;a.download=filename;a.rel='noopener';a.style.position='fixed';a.style.left='-9999px';
+   document.body.appendChild(a);a.click();
+   setTimeout(()=>{a.remove();URL.revokeObjectURL(url);},3000);
+  }
+  $('importPreview').textContent=roster.length
+   ? `${roster.length}人分の名簿入りCSVを出力しました。D列以降に日付を入力してください。時限を指定する場合は「2026/11/19 1時間目」の形式にします。日付だけなら従来形式として取り込みます。`
+   : `空のCSVテンプレート（50行）を出力しました。現在、この授業の名簿はアプリに登録されていません。先にホーム画面の「名簿・バックアップ」から名簿を登録し、CSVにクラス・番号・氏名を入力してください。`;
+ }catch(err){
+  $('importPreview').textContent='CSVを出力できませんでした。ブラウザのダウンロード許可を確認してください。詳細：'+err.message;
+ }
+});
+function parseCSV(text){
+ text=text.replace(/^\uFEFF/,'');
+ const rows=[];let row=[],field='',quoted=false;
+ for(let i=0;i<text.length;i++){
+  const ch=text[i],next=text[i+1];
+  if(quoted){if(ch==='"'&&next==='"'){field+='"';i++;}else if(ch==='"'){quoted=false;}else{field+=ch;}}
+  else if(ch==='"'){quoted=true;}
+  else if(ch===','){row.push(field);field='';}
+  else if(ch==='\n'){row.push(field);rows.push(row);row=[];field='';}
+  else if(ch!=='\r'){field+=ch;}
+ }
+ row.push(field);if(row.some(v=>v!==''))rows.push(row);
+ return rows;
+}
+
+function normalizeGender(v){
+ const x=String(v||'').trim();
+ if(['男','男子','男性','M','m'].includes(x))return '男';
+ if(['女','女子','女性','F','f'].includes(x))return '女';
+ return '未設定';
+}
+function headerKey(v){return String(v||'').trim().replace(/[ 　]/g,'').toLowerCase();}
+function findHeader(headers,names){return headers.findIndex(h=>names.includes(headerKey(h)));}
+$('rosterTemplate').onclick=()=>{
+ const rows=[['教科','体育'],[],['学年','クラス','番号','男女','名前','ふりがな'],['1','A','1','男','サンプル生徒A','さんぷるせいとえー'],['1','B','1','女','サンプル生徒B','さんぷるせいとびー']];
+ const csv='\uFEFF'+rows.map(row=>row.map(csvEscape).join(',')).join('\r\n');
+ const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download='名簿登録用_教科別.csv';document.body.appendChild(a);a.click();
+ setTimeout(()=>{a.remove();URL.revokeObjectURL(url);},2000);
+ $('rosterMessage').textContent='上部の教科名と各生徒の情報を入力してください。複数クラスを1つのCSVにまとめられます。';
+};
+$('excel').addEventListener('change',async e=>{
+ const file=e.target.files&&e.target.files[0];if(!file)return;
+ try{
+  const rows=parseCSV(await file.text());
+  const subjectRow=rows.find(r=>String(r[0]||'').trim()==='教科');
+  if(!subjectRow)throw Error('1行目に「教科,体育」の形式で教科名を入力してください。');
+  const subject=String(subjectRow[1]||'').trim();
+  if(!['体育','保健','選択体育'].includes(subject))throw Error('教科名は「体育」「保健」「選択体育」のいずれかにしてください。');
+  const hi=rows.findIndex(r=>['学年','クラス','番号','男女','名前','ふりがな'].every((h,i)=>String(r[i]||'').trim()===h));
+  if(hi<0)throw Error('見出しは「学年,クラス,番号,男女,名前,ふりがな」の順にしてください。');
+  const incoming=[],seen=new Set();
+  for(let r=hi+1;r<rows.length;r++){
+   const line=rows[r];if(!line||!line.some(v=>String(v).trim()))continue;
+   const grade=String(line[0]||'').trim().replace(/年$/,'');
+   const klass=String(line[1]||'').trim(),no=String(line[2]||'').trim(),name=String(line[4]||'').trim();
+   if(!grade&&!klass&&!no&&!name)continue;
+   if(!grade||!klass||!no||!name)throw Error(`${r+1}行目：学年・クラス・番号・名前を入力してください。`);
+   const cls=grade==='3'&&klass.includes('文系')?'3年文系':`${grade}${klass}`;
+   const id=subject==='体育'?`${cls}-${no}`:`${subject}-${cls}-${no}`;
+   if(seen.has(id))throw Error(`${r+1}行目：${cls} ${no}番が重複しています。`);
+   seen.add(id);
+   incoming.push({id,cls,no,name,gender:normalizeGender(line[3]),furigana:String(line[5]||'').trim(),subject});
+  }
+  if(!incoming.length)throw Error('取り込める生徒がいません。');
+  const replaceClasses=new Set(incoming.map(st=>st.cls));
+  const remaining=students.filter(st=>!((st.subject||(st.cls?'体育':''))===subject&&replaceClasses.has(st.cls)));
+  const remainIds=new Set(remaining.map(st=>st.id));
+  if(incoming.some(st=>remainIds.has(st.id)))throw Error('別教科または既存名簿と番号が重複しています。');
+  if(!confirm(`${subject}の名簿 ${incoming.length}人（${[...replaceClasses].join('・')}）を登録します。\n今回のCSVに含まれる同じ教科・クラスの名簿は置き換えます。他教科と他クラスは残ります。\n続けますか？`))return;
+  students=[...remaining,...incoming];write('v3students',students);
+  states={};renderFormation();renderCautions();
+  $('rosterMessage').textContent=`${subject}の名簿を登録しました：${incoming.length}人`;
+  alert(`${subject}の名簿を${incoming.length}人登録しました。`);
+ }catch(err){$('rosterMessage').textContent='名簿を読み込めませんでした：'+err.message;alert('名簿を読み込めませんでした。\n'+err.message);}
+ finally{e.target.value='';}
+});
+function normalizeDate(v){
+ const s=String(v||'').trim();
+ let m=s.match(/^(\d{4})[\/.-](\d{1,2})[\/.-](\d{1,2})$/);
+ if(!m)return null;
+ return `${m[1]}-${String(m[2]).padStart(2,'0')}-${String(m[3]).padStart(2,'0')}`;
+}
+function statusFromCell(v){
+ const s=String(v||'').trim();
+ if(!s||s==='出席'||s==='出')return '出席';
+ if(s==='欠席'||s==='欠')return '欠席';
+ if(s==='公欠'||s==='公')return '公欠';
+ if(s==='出席停止'||s==='停')return '出席停止';
+ return null;
+}
+function previewHistory(fileText){
+ const rows=parseCSV(fileText);
+ if(rows.length<2)throw Error('CSVにデータがありません。');
+ const headerIndex=rows.findIndex(r=>String(r[0]||'').trim()==='クラス'&&String(r[1]||'').trim()==='番号'&&String(r[2]||'').trim()==='氏名');
+ if(headerIndex<0)throw Error('「クラス・番号・氏名」の見出し行が見つかりません。テンプレートの「出欠入力」シートをCSV UTF-8で保存してください。');
+ const header=rows[headerIndex],dataRows=rows.slice(headerIndex+1),courseObj=course($('importCourse').value);
+ if(header.length<4)throw Error('D列以降に授業日を入力してください。');
+ const dateCols=header.slice(3).map((v,i)=>{const raw=String(v||'').trim(),m=raw.match(/^(.*?)(?:\s*(?:第)?([1-7])時間目)$/),date=normalizeDate(m?m[1]:raw);return date?{date,index:i+3,period:m?Number(m[2]):null}:null;}).filter(Boolean);
+ if(!dateCols.length)throw Error('D列以降に授業日が見つかりません。Excelで日付を入力してからCSV保存してください。');
+ const duplicateDates=dateCols.map(x=>`${x.date}|${x.period??'legacy'}`).filter((d,i,a)=>a.indexOf(d)!==i);
+ if(duplicateDates.length)throw Error('同じ授業日・時限が複数列にあります：'+[...new Set(duplicateDates)].join('、'));
+ const studentMap=new Map(students.map(s=>[`${s.cls}|${String(s.no).trim()}`,s]));
+ const allowed=new Set(courseObj.classes);
+ let errors=[],items=[],matched=0,seenStudents=new Set();
+ for(let r=0;r<dataRows.length;r++){
+  const line=dataRows[r];if(!line||!line.some(v=>String(v).trim()))continue;
+  const cls=String(line[0]||'').trim(),no=String(line[1]||'').trim(),name=String(line[2]||'').trim();
+  if(!cls&&!no&&!name)continue;
+  if(!allowed.has(cls)){errors.push(`${headerIndex+r+2}行目：${cls}は選択した授業の対象クラスではありません`);continue;}
+  const st=studentMap.get(`${cls}|${no}`);
+  if(!st){errors.push(`${headerIndex+r+2}行目：名簿にない生徒（${cls} ${no}番）`);continue;}
+  if(name&&name!==st.name){errors.push(`${headerIndex+r+2}行目：${cls} ${no}番の氏名が名簿と一致しません`);continue;}
+  if(seenStudents.has(st.id)){errors.push(`${headerIndex+r+2}行目：${cls} ${no}番が重複しています`);continue;}
+  seenStudents.add(st.id);matched++;
+  for(const dc of dateCols){
+   const raw=line[dc.index]??'';
+   const status=statusFromCell(raw);
+   if(status===null){errors.push(`${headerIndex+r+2}行目・${dc.date}：出欠状況「${raw}」を判定できません`);continue;}
+   if(dc.period&&dc.period>maxPeriodForDate(dc.date)){errors.push(`${headerIndex+r+2}行目・${dc.date}：この曜日に${dc.period}時間目は設定できません`);continue;}
+   items.push({student:st,date:dc.date,period:dc.period,status});
+  }
+ }
+ if(!matched)errors.push('名簿と一致する生徒がありません。クラス・番号を確認してください。');
+ const expected=students.filter(s=>allowed.has(s.cls));
+ const missing=expected.filter(s=>!seenStudents.has(s.id));
+ if(missing.length)errors.push(`名簿の生徒がCSVに${missing.length}人分ありません。例：${missing.slice(0,5).map(s=>s.cls+' '+s.no+'番').join('、')}。全員分の行を含めてください。`);
+ const existing=new Set(latestRecordsBySlot(records).flatMap(rec=>rec.statuses.map(s=>`${rec.courseId}|${rec.date}|${slotPeriod(rec)??'legacy'}|${s.id}`)));
+ const duplicates=items.filter(x=>existing.has(`${courseObj.id}|${x.date}|${x.period??'legacy'}|${x.student.id}`));
+ if(duplicates.length)errors.push(`既存記録と重複する授業日・時限・生徒の組み合わせが${duplicates.length}件あります。重複を解消してから取り込んでください。`);
+ if(errors.length)throw Error(errors.slice(0,12).join('\n')+(errors.length>12?`\nほか${errors.length-12}件`:'')); 
+ pendingHistory={course:courseObj,items,dates:dateCols.map(x=>x.date),slots:dateCols.map(x=>`${x.date}${x.period?' '+x.period+'時間目':''}`)};
+ $('importRange').value=`${pendingHistory.dates[0]} ～ ${pendingHistory.dates[pendingHistory.dates.length-1]}`;
+ $('importCount').value=`${items.length}件`;
+ $('importPreview').innerHTML=`<strong>取り込み確認</strong><br>対象生徒：${matched}人<br>授業日・時限：${dateCols.length}枠<br>記録件数：${items.length}件<br><br>※授業日が設定された列は、空欄も「出席」として取り込みます。欠席・公欠・出席停止だけを変更してください。`;
+ $('confirmImport').disabled=false;
+}
+$('historyCsv').onchange=async e=>{
+ const f=e.target.files[0];if(!f)return;
+ try{pendingHistory=null;$('confirmImport').disabled=true;previewHistory(await f.text());}
+ catch(err){$('importPreview').textContent='取り込みできません：'+err.message;$('importCount').value='エラー';}
+};
+$('clearImport').onclick=()=>{pendingHistory=null;$('historyCsv').value='';$('importRange').value='CSV内の日付を確認';$('importCount').value='未確認';$('importPreview').textContent='まだファイルが選択されていません。';$('confirmImport').disabled=true;};
+$('confirmImport').onclick=()=>{
+ if(!pendingHistory)return;
+ const c=pendingHistory.course;
+ const bySlot=new Map();
+ for(const x of pendingHistory.items){const key=`${x.date}|${x.period??'legacy'}`;if(!bySlot.has(key))bySlot.set(key,{date:x.date,period:x.period,statuses:[]});bySlot.get(key).statuses.push({id:x.student.id,cls:x.student.cls,no:x.student.no,name:x.student.name,gender:x.student.gender,status:x.status});}
+ for(const slot of bySlot.values()){
+  const all=courseStudents(c),map=new Map(slot.statuses.map(s=>[s.id,s]));
+  const rec={id:'past_'+Date.now()+'_'+slot.date.replace(/-/g,'')+'_'+(slot.period??'legacy'),courseId:c.id,label:c.label,subject:c.subject,units:c.units,date:slot.date,statuses:all.map(s=>map.get(s.id)||({id:s.id,cls:s.cls,no:s.no,name:s.name,gender:s.gender,status:'出席'})),source:'過去入力'};
+  if(slot.period!==null)rec.period=slot.period;
+  records.push(rec);
+ }
+ write('v3records',records);
+ alert(`${bySlot.size}枠分の過去データを登録しました。`);
+ $('clearImport').click();renderCautions();show('home');
+};
+
+fillCourses();applyDefaultPeriodForDate();loadRegistrationStates();renderFormation();renderCourseCalendar();renderCautions();
+
+// 学校共通パスワード：各端末で初回設定し、非抽出CryptoKeyをIndexedDBに保存
+const APP_BACKUP_ID = 'attendance-app-v3';
+const APP_STORAGE_KEYS = ['v3students', 'v3records', 'v3threshold'];
+const DEVICE_NUMBER_KEY = 'attendanceDeviceNumber';
+const LAST_BACKUP_KEY = 'attendanceLastBackupAt';
+const KEY_DB_NAME = 'attendance-app-security';
+const KEY_DB_STORE = 'keys';
+const KEY_ID = 'school-common-backup-key-v1';
+const SHARED_KDF_SALT_B64 = '/8Ps/xxgF/cv1WW9VwPVdw==';
+const KDF_ITERATIONS = 310000;
+
+function currentDeviceNumber(){ return localStorage.getItem(DEVICE_NUMBER_KEY) || ''; }
+function updateDeviceStatus(){
+  $('deviceNumber').value=currentDeviceNumber();
+  const n=currentDeviceNumber();
+  $('deviceStatus').textContent=n ? `この端末は 教員用iPad${n} として登録されています。` : '端末番号が未登録です。番号を選んで登録してください。';
+  const last=localStorage.getItem(LAST_BACKUP_KEY);
+  if(!last){$('backupScheduleStatus').textContent='週次バックアップ：まだ保存履歴がありません。';}
+  else {
+    const d=new Date(last), due=Date.now()-d.getTime()>=7*24*60*60*1000;
+    $('backupScheduleStatus').textContent=`最終バックアップ：${d.toLocaleString('ja-JP')} ／ `+(due?'週次バックアップの時期です。':'次回の目安：7日後');
+    $('backupScheduleStatus').style.color=due?'#b45309':'';
+  }
+}
+$('saveDeviceNumber').onclick=()=>{
+  const n=$('deviceNumber').value;
+  if(!n){alert('教員用iPad番号を選択してください。');return;}
+  const old=currentDeviceNumber();
+  if(old && old!==n && !confirm(`端末番号を 教員用iPad${old} から 教員用iPad${n} に変更しますか？`)) return;
+  localStorage.setItem(DEVICE_NUMBER_KEY,n);
+  updateDeviceStatus();
+  $('backupMessage').textContent=`この端末を 教員用iPad${n} として登録しました。`;
+};
+updateDeviceStatus();
+
+function openKeyDB(){
+  return new Promise((resolve,reject)=>{
+    const req=indexedDB.open(KEY_DB_NAME,1);
+    req.onupgradeneeded=()=>{ if(!req.result.objectStoreNames.contains(KEY_DB_STORE)) req.result.createObjectStore(KEY_DB_STORE); };
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error || new Error('暗号鍵保存領域を開けません。'));
+  });
+}
+function currentKeyVersion(){ return Number(localStorage.getItem('attendanceKeyVersion') || '1'); }
+function keyRecordId(version){ return `${KEY_ID}-v${version}`; }
+async function getKeyRecord(id){
+  const db=await openKeyDB();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(KEY_DB_STORE,'readonly');
+    const req=tx.objectStore(KEY_DB_STORE).get(id);
+    req.onsuccess=()=>{db.close();resolve(req.result||null);};
+    req.onerror=()=>{db.close();reject(req.error);};
+  });
+}
+async function putKeyRecord(id,key){
+  const db=await openKeyDB();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(KEY_DB_STORE,'readwrite');
+    tx.objectStore(KEY_DB_STORE).put(key,id);
+    tx.oncomplete=()=>{db.close();resolve();};
+    tx.onerror=()=>{db.close();reject(tx.error||new Error('暗号鍵を保存できません。'));};
+    tx.onabort=()=>{db.close();reject(tx.error||new Error('暗号鍵の保存が中断されました。'));};
+  });
+}
+async function getStoredKey(version=currentKeyVersion()){
+  return await getKeyRecord(keyRecordId(version)) || (version===1 ? await getKeyRecord(KEY_ID) : null);
+}
+async function storeKey(key,version=currentKeyVersion()){
+  await putKeyRecord(keyRecordId(version),key);
+  await putKeyRecord(KEY_ID,key);
+  localStorage.setItem('attendanceKeyVersion',String(version));
+}
+function bytesToBase64(bytes){
+  let binary='';for(let i=0;i<bytes.length;i++)binary+=String.fromCharCode(bytes[i]);
+  return btoa(binary);
+}
+function base64ToBytes(value){
+  const binary=atob(value);return Uint8Array.from(binary,ch=>ch.charCodeAt(0));
+}
+async function deriveSharedKey(password){
+  const salt=base64ToBytes(SHARED_KDF_SALT_B64);
+  const material=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey(
+    {name:'PBKDF2',salt,iterations:KDF_ITERATIONS,hash:'SHA-256'},
+    material,{name:'AES-GCM',length:256},false,['encrypt','decrypt']
+  );
+}
+async function updatePasswordStatus(){
+  try{
+    const key=await getStoredKey();
+    const version=currentKeyVersion();
+    $('commonPasswordStatus').textContent=key
+      ? `共通パスワード設定済み（鍵バージョン ${version}）：保存・復元時の入力は不要です。`
+      : '共通パスワード未設定：最初に「初回設定」を押してください。';
+    $('commonPasswordStatus').style.color=key?'#24794c':'#a96a00';
+    $('backupSave').disabled=!key;
+    $('rosterExport').disabled=!key;
+    $('changeCommonPassword').disabled=!key;
+  }catch(e){
+    $('commonPasswordStatus').textContent='暗号鍵保存領域を利用できません。このブラウザの設定・対応状況を確認してください。';
+    $('backupSave').disabled=true;
+    $('rosterExport').disabled=true;
+    $('changeCommonPassword').disabled=true;
+  }
+}
+$('setupCommonPassword').onclick=async()=>{
+  try{
+    if(!crypto || !crypto.subtle || !window.indexedDB) throw new Error('このブラウザでは安全な鍵保存機能を利用できません。');
+    if(await getStoredKey()) throw new Error('この端末にはすでに設定があります。年度更新時は「年度更新・パスワード変更」を使用してください。');
+    const password=prompt('学校で決めた共通パスワードを入力してください（6文字以上）。');
+    if(password===null)return;
+    if(password.length<6)throw new Error('パスワードは6文字以上にしてください。');
+    const confirmPassword=prompt('確認のため、同じ共通パスワードをもう一度入力してください。');
+    if(confirmPassword===null)return;
+    if(password!==confirmPassword)throw new Error('パスワードが一致しません。');
+    const key=await deriveSharedKey(password);
+    await storeKey(key,1);
+    await updatePasswordStatus();
+    $('backupMessage').textContent='この端末に学校共通パスワードを初回設定しました。';
+  }catch(e){$('backupMessage').textContent='共通パスワードを設定できませんでした。'+e.message;}
+};
+
+$('changeCommonPassword').onclick=async()=>{
+  try{
+    if(!crypto || !crypto.subtle || !window.indexedDB) throw new Error('このブラウザでは安全な鍵保存機能を利用できません。');
+    const oldVersion=currentKeyVersion();
+    const oldKey=await getStoredKey(oldVersion);
+    if(!oldKey)throw new Error('この端末に共通パスワードが設定されていません。先に初回設定してください。');
+
+    const oldPassword=prompt('現在使用中の学校共通パスワードを入力してください。');
+    if(oldPassword===null)return;
+    const oldDerived=await deriveSharedKey(oldPassword);
+
+    // Verify the entered current password against the already stored, non-extractable key.
+    const challenge=new TextEncoder().encode('attendance-app-password-check-v1');
+    const challengeIv=crypto.getRandomValues(new Uint8Array(12));
+    const challengeCipher=await crypto.subtle.encrypt({name:'AES-GCM',iv:challengeIv},oldKey,challenge);
+    let verified;
+    try{
+      verified=await crypto.subtle.decrypt({name:'AES-GCM',iv:challengeIv},oldDerived,challengeCipher);
+    }catch(_){throw new Error('現在のパスワードが正しくありません。変更していません。');}
+    if(new TextDecoder().decode(verified)!=='attendance-app-password-check-v1')
+      throw new Error('現在のパスワードを確認できません。変更していません。');
+
+    const newPassword=prompt('新しい学校共通パスワードを入力してください（6文字以上）。');
+    if(newPassword===null)return;
+    if(newPassword.length<6)throw new Error('新しいパスワードは6文字以上にしてください。');
+    const confirmNew=prompt('確認のため、新しいパスワードをもう一度入力してください。');
+    if(confirmNew===null)return;
+    if(newPassword!==confirmNew)throw new Error('新しいパスワードが一致しません。');
+
+    if(!confirm(`鍵バージョンを ${oldVersion} から ${oldVersion+1} に更新します。\\n旧年度のバックアップは旧パスワードの鍵で引き続き復元できます。\\n新しいバックアップは新パスワードの鍵で作成します。\\n変更を実行しますか？`))return;
+
+    // Preserve the old key for old backups, then store the new current key.
+    await putKeyRecord(keyRecordId(oldVersion),oldKey);
+    const newKey=await deriveSharedKey(newPassword);
+    await storeKey(newKey,oldVersion+1);
+    await updatePasswordStatus();
+    $('backupMessage').textContent=`共通パスワードを更新しました。旧年度バックアップ用の鍵（バージョン ${oldVersion}）もこの端末に保持しています。`;
+    alert('共通パスワードを更新しました。ほかのiPadでも同じ変更を行ってください。');
+  }catch(e){$('backupMessage').textContent='パスワードを変更できませんでした。'+e.message;}
+};
+
+function downloadJSON(filename,data){
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');
+  a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function readAppData(data){
+  if(!data || data.app!==APP_BACKUP_ID || data.formatVersion!==1 ||
+     !data.data || !Array.isArray(data.data.students) || !Array.isArray(data.data.records) ||
+     !Number.isFinite(Number(data.data.threshold))) throw new Error('有効な出欠管理バックアップではありません。');
+  const ids=new Set();
+  for(const s of data.data.students){
+    if(!s || typeof s!=='object' || !s.id || typeof s.name!=='string' || !s.cls || s.no==null)
+      throw new Error('名簿データに不正な行があります。復元していません。');
+    if(ids.has(String(s.id)))throw new Error('名簿に重複した生徒IDがあります。復元していません。');
+    ids.add(String(s.id));
+  }
+  for(const r of data.data.records){
+    if(!r || typeof r!=='object' || !Array.isArray(r.statuses) || typeof r.date!=='string')
+      throw new Error('出欠記録に不正なデータがあります。復元していません。');
+  }
+  return data;
+}
+async function decryptWithKey(file,key){
+  const plain=await crypto.subtle.decrypt(
+    {name:'AES-GCM',iv:base64ToBytes(file.iv)},key,base64ToBytes(file.ciphertext)
+  );
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+
+function downloadRosterPackage(filename,data){
+  const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+$('rosterExport').onclick=async()=>{
+  try{
+    const key=await getStoredKey();
+    if(!key)throw new Error('先に学校共通パスワードを初回設定してください。');
+    const roster=JSON.parse(localStorage.getItem('v3students')||'[]');
+    if(!Array.isArray(roster))throw new Error('名簿データを読み取れません。');
+    const payload={app:'attendance-roster-package',formatVersion:1,exportedAt:new Date().toISOString(),students:roster};
+    const iv=crypto.getRandomValues(new Uint8Array(12));
+    const cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(JSON.stringify(payload)));
+    const file={app:'attendance-roster-package',formatVersion:1,encrypted:true,keyVersion:currentKeyVersion(),iv:bytesToBase64(iv),ciphertext:bytesToBase64(new Uint8Array(cipher))};
+    const stamp=new Date().toISOString().replace(/[:.]/g,'-');
+    downloadRosterPackage(`学校共通名簿_暗号化_${stamp}.json`,file);
+    $('rosterMessage').textContent=`共通名簿配布ファイルを作成しました（${roster.length}人）。このファイルを各iPadに配布してください。`;
+  }catch(e){$('rosterMessage').textContent='名簿配布ファイルを作成できませんでした：'+e.message;alert('名簿配布ファイルを作成できませんでした。\n'+e.message);}
+};
+$('rosterPackageFile').addEventListener('change',async e=>{
+  const file=e.target.files&&e.target.files[0];if(!file)return;
+  try{
+    const wrapped=JSON.parse(await file.text());
+    if(wrapped.app!=='attendance-roster-package'||wrapped.formatVersion!==1||wrapped.encrypted!==true)
+      throw new Error('有効な共通名簿配布ファイルではありません。');
+    const key=await getStoredKey(Number(wrapped.keyVersion||1));
+    if(!key)throw new Error(`鍵バージョン ${wrapped.keyVersion||1} がこの端末にありません。先に同じ学校共通パスワードを設定してください。`);
+    let payload;
+    try{
+      const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:base64ToBytes(wrapped.iv)},key,base64ToBytes(wrapped.ciphertext));
+      payload=JSON.parse(new TextDecoder().decode(plain));
+    }catch(_){throw new Error('共通パスワードが一致しないか、ファイルが破損しています。');}
+    if(payload.app!=='attendance-roster-package'||payload.formatVersion!==1||!Array.isArray(payload.students))
+      throw new Error('名簿データの形式が正しくありません。');
+    const incoming=payload.students, ids=new Set();
+    for(const st of incoming){
+      if(!st||!st.id||!st.cls||st.no==null||typeof st.name!=='string')throw new Error('名簿に不正な生徒データがあります。');
+      if(ids.has(String(st.id)))throw new Error('名簿に重複した生徒IDがあります。');
+      ids.add(String(st.id));
+    }
+    const current=JSON.parse(localStorage.getItem('v3students')||'[]');
+    const incomingById=new Map(incoming.map(st=>[String(st.id),st]));
+    const incomingClasses=new Set(incoming.map(st=>`${st.subject||(st.cls?'体育':'')}|${st.cls}`));
+    const merged=current.map(old=>{
+      const key=`${old.subject||(old.cls?'体育':'')}|${old.cls}`;
+      if(!incomingClasses.has(key))return old;
+      const fresh=incomingById.get(String(old.id));
+      return fresh?{...old,...fresh,enrollmentStatus:'active'}:{...old,enrollmentStatus:'ended'};
+    });
+    const currentIds=new Set(current.map(st=>String(st.id)));
+    incoming.forEach(st=>{if(!currentIds.has(String(st.id)))merged.push({...st,enrollmentStatus:'active'});});
+    const mergedIds=new Set();
+    for(const st of merged){if(mergedIds.has(String(st.id)))throw new Error('更新後の名簿で生徒IDが重複します。');mergedIds.add(String(st.id));}
+    if(!confirm(`共通名簿（${incoming.length}人）を読み込みます。\\n登録内容を更新し、配布ファイルに含まれない同一教科・クラスの生徒は「在籍終了」とします。\\n過去の出欠記録は変更しません。\\n続けますか？`))return;
+    students=merged;write('v3students',students);
+    states={};renderFormation();renderCautions();
+    $('rosterMessage').textContent=`共通名簿を更新しました。登録対象：${incoming.length}人。過去の出欠記録は保持されています。`;
+    alert('共通名簿を更新しました。過去の出欠記録は変更していません。');
+  }catch(err){$('rosterMessage').textContent='共通名簿を更新できませんでした：'+err.message;alert('共通名簿を更新できませんでした。\n'+err.message);}
+  finally{e.target.value='';}
+});
+
+$('backupSave').onclick=async()=>{
+  try{
+    const key=await getStoredKey();
+    if(!key)throw new Error('先に「初回設定・再設定」から共通パスワードを設定してください。');
+    const payload={
+      app:APP_BACKUP_ID,formatVersion:1,appVersion:'3.9.1',
+      exportedAt:new Date().toISOString(),deviceNumber:currentDeviceNumber(),
+      data:{
+        students:JSON.parse(localStorage.getItem('v3students')||'[]'),
+        records:JSON.parse(localStorage.getItem('v3records')||'[]'),
+        threshold:JSON.parse(localStorage.getItem('v3threshold')||'5')
+      }
+    };
+    if(!Array.isArray(payload.data.students)||!Array.isArray(payload.data.records))
+      throw new Error('保存データの形式を確認できません。');
+    const iv=crypto.getRandomValues(new Uint8Array(12));
+    const cipher=await crypto.subtle.encrypt(
+      {name:'AES-GCM',iv},key,new TextEncoder().encode(JSON.stringify(payload))
+    );
+    const encryptedFile={
+      app:APP_BACKUP_ID,formatVersion:3,encrypted:true,
+      encryption:'AES-256-GCM',keyDerivation:'PBKDF2-SHA-256',
+      keyVersion:currentKeyVersion(),exportedAt:payload.exportedAt,
+      iv:bytesToBase64(iv),ciphertext:bytesToBase64(new Uint8Array(cipher))
+    };
+    const stamp=new Date().toISOString().replace(/[:.]/g,'-');
+    downloadJSON(`出欠管理_教員用iPad${currentDeviceNumber()||'未設定'}_暗号化バックアップ_${stamp}.json`,encryptedFile);
+    localStorage.setItem(LAST_BACKUP_KEY,payload.exportedAt);
+    updateDeviceStatus();
+    $('backupMessage').textContent='暗号化バックアップを保存しました。共通パスワード設定済みの端末で自動復元できます。';
+  }catch(e){$('backupMessage').textContent='バックアップを作成できませんでした。'+e.message;}
+};
+
+$('backupFile').addEventListener('change',async(event)=>{
+  const file=event.target.files && event.target.files[0];if(!file)return;
+  try{
+    let parsed=JSON.parse(await file.text());
+    if(parsed && parsed.encrypted===true && parsed.formatVersion===3){
+      const backupVersion=Number(parsed.keyVersion||1);
+      const key=await getStoredKey(backupVersion);
+      if(!key)throw new Error(`この端末にバックアップ用の鍵バージョン ${backupVersion} がありません。該当年度の共通パスワードを設定した端末で復元するか、管理担当者に確認してください。`);
+      try{parsed=await decryptWithKey(parsed,key);}
+      catch(_){throw new Error('この端末の共通パスワード設定と一致しないか、バックアップファイルが破損しています。');}
+    }else if(parsed && parsed.encrypted===true && parsed.formatVersion===2){
+      const legacyPassword=prompt('旧形式バックアップです。作成時のパスワードを入力してください。');
+      if(legacyPassword===null)return;
+      try{
+        const material=await crypto.subtle.importKey('raw',new TextEncoder().encode(legacyPassword),'PBKDF2',false,['deriveKey']);
+        const key=await crypto.subtle.deriveKey(
+          {name:'PBKDF2',salt:base64ToBytes(parsed.salt),iterations:parsed.iterations||310000,hash:'SHA-256'},
+          material,{name:'AES-GCM',length:256},false,['decrypt']
+        );
+        parsed=await decryptWithKey(parsed,key);
+      }catch(_){throw new Error('旧形式バックアップのパスワードが違うか、ファイルが破損しています。');}
+    }else if(parsed && parsed.app===APP_BACKUP_ID && parsed.formatVersion===1){
+      if(!confirm('このバックアップは暗号化されていない旧形式です。氏名などがそのまま記録されています。復元を続けますか？'))return;
+    }
+    readAppData(parsed);
+    const backupDevice=parsed.deviceNumber||'',thisDevice=currentDeviceNumber();
+    if(backupDevice && thisDevice && backupDevice!==thisDevice){
+      if(!confirm(`このバックアップは 教員用iPad${backupDevice} のものです。\\n現在の端末は 教員用iPad${thisDevice} です。\\n別端末のデータをこのiPadに復元しますか？`))return;
+    }
+    const exported=parsed.exportedAt?new Date(parsed.exportedAt).toLocaleString('ja-JP'):'日時不明';
+    if(!confirm(`バックアップ日時：${exported}\\n名簿 ${parsed.data.students.length}人／出欠記録 ${parsed.data.records.length}件\\n\\n現在の名簿・出欠記録・欠時数設定は、バックアップの内容に置き換わります。\\n復元を実行しますか？`)){
+      $('backupMessage').textContent='復元をキャンセルしました。現在のデータは変更していません。';return;
+    }
+    const previous={};for(const k of APP_STORAGE_KEYS)previous[k]=localStorage.getItem(k);
+    try{
+      localStorage.setItem('v3students',JSON.stringify(parsed.data.students));
+      localStorage.setItem('v3records',JSON.stringify(parsed.data.records));
+      localStorage.setItem('v3threshold',JSON.stringify(Number(parsed.data.threshold)));
+      students=parsed.data.students;records=parsed.data.records;threshold=Number(parsed.data.threshold);states={};
+      renderFormation();renderCautions();if(typeof renderStats==='function')renderStats();
+      $('backupMessage').textContent=`復元が完了しました。名簿 ${students.length}人、出欠記録 ${records.length}件を読み込みました。`;
+      alert('バックアップから復元しました。');
+    }catch(err){
+      for(const k of APP_STORAGE_KEYS){if(previous[k]===null)localStorage.removeItem(k);else localStorage.setItem(k,previous[k]);}
+      throw err;
+    }
+  }catch(e){$('backupMessage').textContent='復元できませんでした。現在のデータは変更していません。詳細：'+e.message;}
+  finally{event.target.value='';}
+});
+updatePasswordStatus();
+
+
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then(reg => {
+      reg.update().catch(() => {});
+    }).catch(err => {
+      console.warn('オフライン利用の準備に失敗しました', err);
+    });
+  });
+}
